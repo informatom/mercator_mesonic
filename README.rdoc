@@ -3,3 +3,14 @@
 Mercator_Mesonic provides Mesonic ERP integration for the Mercator Guided Selling Application.
 
 This project uses the GPL V3 license. See file LICENSE in the same directory for details about the GPL V3.
+
+# Installation instructions
+
+1. Put in your Gemfile
+'''ruby
+gem "mercator_mesonic"
+'''
+2 Get all migrations into your app by running in your ipp directory
+'''ruby
+rake mercator_mesonic:install:migrations
+'''

@@ -16,5 +16,5 @@ Gem::Specification.new do |s|
   s.test_files = Dir["test/**/*"]
 
   s.add_dependency "rails", "~> 4.0.3"
-  s.add_dependency 'activerecord-sqlserver-adapter', '~> 4.0.0', :git => 'git://github.com/rails-sqlserver/activerecord-sqlserver-adapter'
+  s.add_dependency 'activerecord-sqlserver-adapter', '~> 4.0.0'
 end
