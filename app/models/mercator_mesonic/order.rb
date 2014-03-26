@@ -12,7 +12,7 @@ module MercatorMesonic
 
     def self.initialize_mesonic(order: nil, custom_order_number: nil)
 
-      customer = order.customer
+      customer = order.user
       timestamp = Time.now
       mesonic_kontenstamm_fakt = customer.mesonic_kontenstamm_fakt
       custom_order_number |= timestamp.strftime('%y%m%d%H%M%S') + timestamp.usec # timestamp, if custom order number not provided

@@ -10,7 +10,17 @@ This project uses the GPL V3 license. See file LICENSE in the same directory for
 '''ruby
 gem "mercator_mesonic"
 '''
-2 Get all migrations into your app by running in your ipp directory
+2. Instell gem by running
+'''ruby
+bundle install
+'''
+3.2 Get all migrations into your app by running in your ipp directory
 '''ruby
 rake mercator_mesonic:install:migrations
 '''
+4. Run Migrations added
+'''ruby
+rake db:migrate
+'''
+5. Mount the Engine in your routes.rb
+mount MercatorMesonic::Engine => "/mercator_mesonic"
