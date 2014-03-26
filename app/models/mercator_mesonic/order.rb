@@ -54,7 +54,7 @@ module MercatorMesonic
                c047: mesonic_kontenstamm_fakt.c066,  # preisliste
                c049: 0, # fw einheit
                c050: 0, # fw-faktor
-               c051: billing_method
+               c051: billing_method,
                c053: mesonic_kontenstamm_fakt.c122, # kostentraeger
                c054: 400, # kostenstelle
                c056: 0, # skonto%2
@@ -70,7 +70,7 @@ module MercatorMesonic
                c082: nil, #HAS 20140325 FIXME: order.shipping_name2 Adresse erweitern
                c086: 0, # teilliefersperre
                c088: 0, # priorität
-               c089: order.shipping_method.to_i #HAS 20140325 FIXME
+               c089: order.shipping_method.to_i, #HAS 20140325 FIXME
                c090: 0, # freier text 2
                c091: 0, # freier text 3
                c092: 0, # freier text 4
@@ -78,7 +78,7 @@ module MercatorMesonic
                c094: 0, # methode
                c095: 0, # ausprägung 1
                c096: 0, # ausprägung 2
-               c097: order.billing_method.to_i #HAS 20140325 FIXME
+               c097: order.billing_method.to_i, #HAS 20140325 FIXME
                c098: 101, # freigabekontrolle angebot
                c099: order.sum_incl_vat, # kumulierter zahlungsbetrag
                c100: order.sum_incl_vat, # endbetrag

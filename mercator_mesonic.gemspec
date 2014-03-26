@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.version     = MercatorMesonic::VERSION
   s.authors     = ["Stefan Haslinger"]
   s.email       = ["stefan.haslinger@mittenin.at"]
-  s.homepage    = "http://informatom.com"
+  s.homepage    = "http://mercator.informatom.com"
   s.summary     = "MercatorMesonic provides Mercator ERP Integration for the Mesonic Guided Selling Application."
   s.description = "MercatorMesonic interfaces between Mercator and Mesonic in the realm of customers, addresses, articles, inventories, orders, and orderitems."
 
