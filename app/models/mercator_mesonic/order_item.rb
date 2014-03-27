@@ -73,7 +73,7 @@ module MercatorMesonic
                c078: index + 1, # zeilennummer (intern)
                c081: 0, # nummer des kontraktpreises
                c082: 0, # menge 2
-               c083: lineitem.vat # Steuersatz in Prozent
+               c083: lineitem.vat, # Steuersatz in Prozent
                c085: 2, # exim durchgeführt änderungen
                c086: 0, # EURO einstandspreis
                c087: 0, # bnk-prozent
