@@ -23,12 +23,12 @@ module MercatorMesonic
 
       self.new(c000: kontonummer + "-" + custom_order_number,
                c004: order.billing_name,
-               c005: order.billing_detail,
+               c005: order.billing_c_o,
                c006: order.billing_street,
                c007: order.billing_postalcode,
                c008: order.billing_city,
                c010: order.shipping_name,
-               c011: order.shipping_detail,
+               c011: order.shipping_c_o,
                c012: order.shipping_street,
                c013: order.shipping_postal,
                c014: order.shipping_postalcode,
@@ -43,7 +43,7 @@ module MercatorMesonic
                c026: "N", # druckstatus faktura
                c027: timestamp, # datum angebot
                c030: customer.erp_account_nr, #### konto-lieferadresse
-               c034: mesonic_kontenstamm_fakt.belegart.c014, # #### belegart
+               c034: mesonic_kontenstamm_fakt.belegart.c014, # belegart
                c035: mesonic_kontenstamm_fakt.c077, # belegart
                c036: mesonic_kontenstamm_fakt.c065, # vertreternummer
                c037: 0, # nettotage
@@ -54,7 +54,7 @@ module MercatorMesonic
                c047: mesonic_kontenstamm_fakt.c066,  # preisliste
                c049: 0, # fw einheit
                c050: 0, # fw-faktor
-               c051: billing_method,
+               c051: order.billing_method, #HAS 20140325  FIXME
                c053: mesonic_kontenstamm_fakt.c122, # kostentraeger
                c054: 400, # kostenstelle
                c056: 0, # skonto%2
@@ -66,8 +66,8 @@ module MercatorMesonic
                c077: 0, # FW-Notierungsflag
                c078: 0, # xml-erweiterung
                c080: 0, # filler
-               c081: nil, #HAS 20140325 FIXME: order.billing_name2 Adresse erweitern
-               c082: nil, #HAS 20140325 FIXME: order.shipping_name2 Adresse erweitern
+               c081: order.billing_detail,
+               c082: order.shipping_detail,
                c086: 0, # teilliefersperre
                c088: 0, # priorität
                c089: order.shipping_method.to_i, #HAS 20140325 FIXME
