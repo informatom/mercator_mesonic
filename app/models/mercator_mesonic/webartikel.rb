@@ -52,7 +52,11 @@ module MercatorMesonic
                                        unit: "Stk.",
                                        delivery_time: delivery_time,
                                        amount: 9999,
-                                       erp_updated_at: webartikel.letzteAend)
+                                       erp_updated_at: webartikel.letzteAend,
+                                       erp_vatline: webartikel.Steuersatzzeile,
+                                       erp_article_group: webartikel.ArtGruppe,
+                                       erp_provision_code: webartikel.Provisionscode,
+                                       erp_instance_flag: webartikel.Auspraegungsflag)
 
             if webartikel.Kennzeichen = "T"
               @product.topseller = true

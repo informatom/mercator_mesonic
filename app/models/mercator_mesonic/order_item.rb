@@ -23,11 +23,11 @@ module MercatorMesonic
                c007: lineitem.product_price, # einzelpreis
                c008: 0, # zeilenrabatt 1 und 2  #FIXME lineitem.discount_abs ?
                c009: 4002, # erlöskonto
-               c010: inventory.Steuersatzzeile, # umsatzsteuer prozentsatz #FIXME
+               c010: inventory.erp_vatline, # umsatzsteuer prozentsatz -> Steuersatzzeile
                c011: 1, # statistikkennzeichen
-               c012: inventory.ArtGruppe, # artikelgruppe #FIXME
+               c012: inventory.erp_article_group, # artikelgruppe
                c013: 0, # liefertage
-               c014: inventory.Provisionscode, # provisionscode #FIXME
+               c014: inventory.erp_provision_code, # provisionscode
                c015: nil, # colli
                c016: 0, # menge bereits geliefert
                c018: 0, # faktor 1 nach formeleingabe
@@ -43,7 +43,7 @@ module MercatorMesonic
                c031: lineitem.value, # gesamtwert
                c032: 0, # positionslevel
                c033: nil, # positionsnummer text
-               c034: inventory.Gewicht, # gewicht #FIXME
+               c034: inventory.weight, # gewicht
                c035: 0, # einstandspreis KZ
                c042: 1, # datentyp
                c044: mesonic_order.c021, # kontonummer
@@ -53,7 +53,7 @@ module MercatorMesonic
                c048: mesonic_order.c027.year, # lieferjahr
                c052: 0, # stat. wert
                c054: 0, # bewertungspreis editieren
-               c055: inventory.Auspraegungsflag, #FIXME
+               c055: inventory.erp_characteristic_flag, Ausprägungsflag
                c056: customer.erp_account_nr, # interessentenkontonummer
                c057: 0, # lagerbestand ändern J/N
                c058: 0, # key für dispozeile

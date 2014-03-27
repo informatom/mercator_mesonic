@@ -6,18 +6,18 @@ module UserExtensions
     attr_accessible :mesonic_kontakte_stamm, :mesonic_kontenstamm, :mesonic_kontenstamm_fakt,
                     :mesonic_kontenstamm_fibu, :mesonic_kontenstamm_adresse
 
-    belongs_to :mesonic_kontakte_stamm, class_name: "MercatorMesonic::KontakteStamm", foreign_key: :erp_account_nr
+    belongs_to :mesonic_kontakte_stamm, class_name: "MercatorMesonic::KontakteStamm", foreign_key: :erp_account_nr, primary_key: :mesoprim
 
-    belongs_to :mesonic_kontenstamm, class_name: "MercatorMesonic::Kontenstamm", foreign_key: :erp_account_nr
+    belongs_to :mesonic_kontenstamm, class_name: "MercatorMesonic::Kontenstamm", foreign_key: :erp_account_nr, primary_key: :mesoprim
     accepts_nested_attributes_for :mesonic_kontenstamm, allow_destroy: false
 
-    belongs_to :mesonic_kontenstamm_fakt, class_name: "MercatorMesonic::KontenstammFakt", foreign_key: :erp_account_nr
+    belongs_to :mesonic_kontenstamm_fakt, class_name: "MercatorMesonic::KontenstammFakt", foreign_key: :erp_account_nr, primary_key: :mesoprim
     accepts_nested_attributes_for :mesonic_kontenstamm_fakt, allow_destroy: false
 
-    belongs_to :mesonic_kontenstamm_fibu, class_name: "MercatorMesonic::KontenstammFibu", foreign_key: :erp_account_nr
+    belongs_to :mesonic_kontenstamm_fibu, class_name: "MercatorMesonic::KontenstammFibu", foreign_key: :erp_account_nr, primary_key: :mesoprim
     accepts_nested_attributes_for :mesonic_kontenstamm_fibu, allow_destroy: false
 
-    belongs_to :mesonic_kontenstamm_adresse, class_name: "MercatorMesonic::KontenstammAdresse", foreign_key: :erp_account_nr
+    belongs_to :mesonic_kontenstamm_adresse, class_name: "MercatorMesonic::KontenstammAdresse", foreign_key: :erp_account_nr, primary_key: :mesoprim
     accepts_nested_attributes_for :mesonic_kontenstamm_adresse, allow_destroy: false
   end
 
