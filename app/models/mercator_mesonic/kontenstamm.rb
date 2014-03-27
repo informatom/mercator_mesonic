@@ -44,7 +44,7 @@ module MercatorMesonic
                c102:     kontonummer,
                c103:     kontonummer,
                c127:     "050-",
-               c069:     2
+               c069:     2,
                mesocomp: AktMandant.mesocomp,
                mesoyear: AktMandant.mesoyear,
                mesoprim: kontonummer.to_s + "-" + AktMandant.mesocomp + "-" + AktMandant.mesoyear.to_s)
