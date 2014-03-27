@@ -13,19 +13,21 @@ module MercatorMesonic
 
     def self.initialize_mesonic(mesonic_order: nil, lineitem: nil, customer: nil, index: nil)
       id = mesonic_order.C000 + "-" + "%06d" % (index + 1 )
+      product = lineitem.product
+      inventory = product.determine_inventory(amount: lineitem.amount)
       self.new(c000: id,
-               c003: lineitem.inventory.article_number,
-               c004: lineitem.inventory.Bezeichnung,
-               c005: lineitem.menge, # menge bestellt
-               c006: lineitem.menge, # menge geliefert
-               c007: lineitem.einzelpreis, # einzelpreis
-               c008: 0, # zeilenrabatt 1 und 2
+               c003: lineitem.product_number,
+               c004: lineitem.description_de,
+               c005: lineitem.amount, # menge bestellt
+               c006: lineitem.amount, # menge geliefert
+               c007: lineitem.product_price, # einzelpreis
+               c008: 0, # zeilenrabatt 1 und 2  #FIXME lineitem.discount_abs ?
                c009: 4002, # erlöskonto
-               c010: lineitem.inventory.Steuersatzzeile, # umsatzsteuer prozentsatz #FIXME
+               c010: inventory.Steuersatzzeile, # umsatzsteuer prozentsatz #FIXME
                c011: 1, # statistikkennzeichen
-               c012: lineitem.inventory.ArtGruppe, # artikelgruppe #FIXME
+               c012: inventory.ArtGruppe, # artikelgruppe #FIXME
                c013: 0, # liefertage
-               c014: lineitem.inventory.Provisionscode, # provisionscode #FIXME
+               c014: inventory.Provisionscode, # provisionscode #FIXME
                c015: nil, # colli
                c016: 0, # menge bereits geliefert
                c018: 0, # faktor 1 nach formeleingabe
@@ -38,10 +40,10 @@ module MercatorMesonic
                c025: mesonic_order.c027, # lieferdatum
                c026: 400, # kostenstelle
                c027: 0, # lieferwoche
-               c031: lineitem.gesamtwert, # gesamtwert #FIXME
+               c031: lineitem.value, # gesamtwert
                c032: 0, # positionslevel
                c033: nil, # positionsnummer text
-               c034: lineitem.inventory.Gewicht, # gewicht #FIXME
+               c034: inventory.Gewicht, # gewicht #FIXME
                c035: 0, # einstandspreis KZ
                c042: 1, # datentyp
                c044: mesonic_order.c021, # kontonummer
@@ -51,7 +53,7 @@ module MercatorMesonic
                c048: mesonic_order.c027.year, # lieferjahr
                c052: 0, # stat. wert
                c054: 0, # bewertungspreis editieren
-               c055: lineitem.inventory.Auspraegungsflag, #FIXME
+               c055: inventory.Auspraegungsflag, #FIXME
                c056: customer.erp_account_nr, # interessentenkontonummer
                c057: 0, # lagerbestand ändern J/N
                c058: 0, # key für dispozeile
@@ -71,7 +73,7 @@ module MercatorMesonic
                c078: index + 1, # zeilennummer (intern)
                c081: 0, # nummer des kontraktpreises
                c082: 0, # menge 2
-               c083: lineitem.inventory.Steuersatzzeile * 10, #FIXME
+               c083: lineitem.vat # Steuersatz in Prozent
                c085: 2, # exim durchgeführt änderungen
                c086: 0, # EURO einstandspreis
                c087: 0, # bnk-prozent
