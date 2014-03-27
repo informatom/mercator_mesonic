@@ -53,7 +53,7 @@ module MercatorMesonic
                c048: mesonic_order.c027.year, # lieferjahr
                c052: 0, # stat. wert
                c054: 0, # bewertungspreis editieren
-               c055: inventory.erp_characteristic_flag, Ausprägungsflag
+               c055: inventory.erp_characteristic_flag, #Ausprägungsflag
                c056: customer.erp_account_nr, # interessentenkontonummer
                c057: 0, # lagerbestand ändern J/N
                c058: 0, # key für dispozeile
