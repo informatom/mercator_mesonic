@@ -56,7 +56,7 @@ module MercatorMesonic
                                        erp_vatline: webartikel.Steuersatzzeile,
                                        erp_article_group: webartikel.ArtGruppe,
                                        erp_provision_code: webartikel.Provisionscode,
-                                       erp_instance_flag: webartikel.Auspraegungsflag)
+                                       erp_characteristic_flag: webartikel.Auspraegungsflag)
 
             if webartikel.Kennzeichen = "T"
               @product.topseller = true
