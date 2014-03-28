@@ -89,7 +89,7 @@ module MercatorMesonic
             @price =  Price.new(value: webartikel.Preis,
                                 scale_from: webartikel.AbMenge,
                                 scale_to: 9999,
-                                vat: 20,
+                                vat: webartikel.Steuersatzzeile * 10,
                                 inventory_id: @inventory.id)
 
             if webartikel.PreisdatumVON && webartikel.PreisdatumVON <= Time.now &&

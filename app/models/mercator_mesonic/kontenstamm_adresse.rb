@@ -53,6 +53,7 @@ module MercatorMesonic
                c050: billing_address.street,
                c051: billing_address.postalcode,
                c052: billing_address.city,
+               c053: billing_address.c_o,
                c123: billing_address.country,
                c180: billing_address.name.split(/\s/).first,
                c181: billing_address.name.split(/\s/).last,
