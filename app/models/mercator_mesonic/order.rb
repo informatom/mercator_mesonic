@@ -18,8 +18,7 @@ module MercatorMesonic
       custom_order_number |= timestamp.strftime('%y%m%d%H%M%S') + timestamp.usec # timestamp, if custom order number not provided
       kontonummer = @customer.mesonic_kontenstamm.try(:kunde?) ? @customer.mesonic_kontenstamm.kontonummer : "09WEB"
       usernummer = customer.erp_contact_nr ? customer.erp_contact_nr : customer.id
-      billing_method = order.billing_method.to_i == 1004 ?
-                       mesonic_kontenstamm_fakt.c107 : IvellioVellin::Order.payment_methods2[ :"#{order.billing_method}" ].try(:to_i) #HAS 20140325 FIXME
+      billing_method = order.mesonic_payment_id == 1004 ? mesonic_kontenstamm_fakt.c107 : order.mesonic_payment_id2 #HAS 20140325 FIXME
 
       self.new(c000: kontonummer + "-" + custom_order_number,
                c004: order.billing_name,
@@ -54,7 +53,7 @@ module MercatorMesonic
                c047: mesonic_kontenstamm_fakt.c066,  # preisliste
                c049: 0, # fw einheit
                c050: 0, # fw-faktor
-               c051: order.billing_method, #HAS 20140325  FIXME
+               c051: billing_method, # ...derived above
                c053: mesonic_kontenstamm_fakt.c122, # kostentraeger
                c054: 400, # kostenstelle
                c056: 0, # skonto%2
@@ -70,7 +69,7 @@ module MercatorMesonic
                c082: order.shipping_detail,
                c086: 0, # teilliefersperre
                c088: 0, # priorität
-               c089: order.shipping_method.to_i, #HAS 20140325 FIXME
+               c089: order.mesonic_shipping_id,
                c090: 0, # freier text 2
                c091: 0, # freier text 3
                c092: 0, # freier text 4
@@ -78,7 +77,7 @@ module MercatorMesonic
                c094: 0, # methode
                c095: 0, # ausprägung 1
                c096: 0, # ausprägung 2
-               c097: order.billing_method.to_i, #HAS 20140325 FIXME
+               c097: order.mesonic_billing_id, #HAS 20140325 FIXME (double check)
                c098: 101, # freigabekontrolle angebot
                c099: order.sum_incl_vat, # kumulierter zahlungsbetrag
                c100: order.sum_incl_vat, # endbetrag

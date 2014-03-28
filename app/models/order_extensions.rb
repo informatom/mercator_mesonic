@@ -1,6 +1,20 @@
 module OrderExtensions
 
   # --- Instance Methods --- #
+  def mesonic_payment_id
+    {"cash_payment" => '1002', "atm_payment" => '1003', "pre_payment" => '1010', "e_payment" => '1011'}[self.billing_method]
+    # further Mesonic ids nachnahme => '1001'
+  end
+
+  def mesonic_payment_id2
+    {"1002" => "17", "1003" => "17", "1010" => "19", "1011" => "25" }[self.payment_id]
+    # "1001" => "17"
+  end
+
+  def mesonic_shipping_id
+    {"parcel_service_shipment" => '1', "pickup_shipment" => '2'}[self.shipping_method]
+  end
+
   def push_to_mesonic
     mesonic_order = MercatorMesonic::Order.initialize_mesonic(order: self)
     mesonic_order_items = []
