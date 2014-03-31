@@ -51,12 +51,13 @@ module MercatorMesonic
                                        charge: webartikel.LfdChargennr,
                                        unit: "Stk.",
                                        delivery_time: delivery_time,
-                                       amount: 9999,
+                                       amount: 0,
                                        erp_updated_at: webartikel.letzteAend,
                                        erp_vatline: webartikel.Steuersatzzeile,
                                        erp_article_group: webartikel.ArtGruppe,
                                        erp_provision_code: webartikel.Provisionscode,
-                                       erp_characteristic_flag: webartikel.Auspraegungsflag)
+                                       erp_characteristic_flag: webartikel.Auspraegungsflag,
+                                       infinite: true)
 
             if webartikel.Kennzeichen = "T"
               @product.topseller = true
