@@ -128,6 +128,15 @@ module MercatorMesonic
       end
     end
 
+    def self.remove_orphans
+      Inventory.all.each do |inventory|
+        if MercatorMesonic::Webartikel.where(Artikelnummer: inventory.number).count == 0
+          inventory.destroy
+          puts "Deleted " + inventory.number.to_s
+        end
+      end
+    end
+
     # --- Instance Methods --- #
 
      def readonly?  # prevents unintentional changes
