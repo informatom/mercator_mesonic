@@ -46,4 +46,8 @@ module UserExtensions
     self.update(erp_account_nr: User.mesoprim(number: @kontonummer),
                 erp_contact_nr: User.mesoprim(number: @kontaktenummer) )
   end
+
+  def mesonic_account_number
+    "%06d" % self.erp_account_nr[2..-11].to_i
+  end
 end

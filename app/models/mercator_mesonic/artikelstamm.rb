@@ -1,12 +1,11 @@
-module MercatorLegacyImporter
-  class Artikelstamm < ActiveRecord::Base
+module MercatorMesonic
+  class Artikelstamm < Base
 
     self.table_name = "t024"
     self.primary_key = "mesoprim"
 
     # --- Class Methods --- #
-
-    def self.invoices_by_account_number( account_number)
+    def self.invoices_by_account_number(account_number: nil)
       find_by_sql(
         "SELECT t025.C030 AS Konto,
         t025.C032 AS Rechnungsdatum,
@@ -26,7 +25,7 @@ module MercatorLegacyImporter
       )
     end
 
-    def self.open_shipments_by_account_number( account_number )
+    def self.open_shipments_by_account_number(account_number: nil)
       find_by_sql(
         "SELECT dbo.t025.c030 AS Konto,
         dbo.t025.c029 AS Lieferscheindatum,
@@ -53,7 +52,7 @@ module MercatorLegacyImporter
       )
     end
 
-    def self.open_payments_by_account_number( account_number )
+    def self.open_payments_by_account_number(account_number: nil)
       find_by_sql(
       "SELECT dbo.t025.c030 AS Konto,
       dbo.t025.c028 AS Auftragsdatum,
