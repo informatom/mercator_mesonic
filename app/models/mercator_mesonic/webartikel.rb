@@ -65,7 +65,8 @@ module MercatorMesonic
                                        erp_article_group: webartikel.ArtGruppe,
                                        erp_provision_code: webartikel.Provisionscode,
                                        erp_characteristic_flag: webartikel.Auspraegungsflag,
-                                       infinite: true)
+                                       infinite: true,
+                                       just_imported: true)
 
             if webartikel.Kennzeichen = "T"
               @product.topseller = true
@@ -134,18 +135,32 @@ module MercatorMesonic
       else
         ::JobLogger.info("No new entries in WEBARTIKEL View, nothing updated.")
       end
+      self.remove_orphans(only_old: true)
     end
 
-    def self.remove_orphans
-      Inventory.all.each do |inventory|
+    def self.remove_orphans(only_old: false)
+      ::JobLogger.info("Removing orphans ...")
+      if only_old
+        @inventories = Inventory.where(just_imported: [false, nil])
+      else
+        @inventories = Inventory.all
+      end
+      @inventories.each do |inventory|
         if MercatorMesonic::Webartikel.where(Artikelnummer: inventory.number).count == 0
           if inventory.destroy
             ::JobLogger.info("Deleted Inventory " + inventory.number.to_s)
           else
             ::JobLogger.info("Deleting Inventory failed: " + inventory.errors.first)
           end
+        else
+          ::JobLogger.info("Inventory " + inventory.number.to_s + " still present in MercatorMesonic::Webartikel.")
         end
       end
+      ::JobLogger.info("Resetting new inventiories ...")
+      Inventory.where(just_imported: true).each do |inventory|
+        inventory.update_attributes(just_imported: false)
+      end
+      ::JobLogger.info("... completed, removing orphans finished.")
     end
 
     def self.test_connection

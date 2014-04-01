@@ -45,12 +45,12 @@ namespace :mesonic do
                                    city: @mesonic_address.city,
                                    country: land)
             if @address.save
-              ::JobLogger.info("Saved Address " + @address.id.to_s
+              ::JobLogger.info("Saved Address " + @address.id.to_s)
             else
               ::JobLogger.error("Saving Address " + @address.name + "failed.")
             end
           else
-            ::JobLogger.warn(Contact " + user.erp_account_nr.to_s + " not found.)
+            ::JobLogger.warn("Contact " + user.erp_account_nr.to_s + " not found.")
           end
         end
       end
