@@ -142,6 +142,9 @@ module MercatorMesonic
         ::JobLogger.info("No new entries in WEBARTIKEL View, nothing updated.")
       end
       self.remove_orphans(only_old: true)
+
+      ::JobLogger.info("Deprecating products ... ")
+      ::Product.deprecate
     end
 
     def self.remove_orphans(only_old: false)
