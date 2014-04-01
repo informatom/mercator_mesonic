@@ -148,6 +148,19 @@ module MercatorMesonic
       end
     end
 
+    def self.test_connection
+      begin
+        self.count
+        ::JobLogger.info("Connection to Mesonic database established successfully.")
+        puts "further logging goes to Joblog: /log/RAILS_ENV_job.log ..."
+        return true
+      rescue
+        ::JobLogger.fatal("Connection to Mesonic database could not be established!")
+        puts "FATAL ERROR: Connection to Mesonic database could not be established!"
+        return false
+      end
+    end
+
     # --- Instance Methods --- #
 
      def readonly?  # prevents unintentional changes

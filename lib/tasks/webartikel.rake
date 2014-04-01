@@ -8,7 +8,11 @@ namespace :webartikel do
   task :import => :environment do
     ::JobLogger.info("=" * 50)
     ::JobLogger.info("Started Job: webartikel:import")
-    MercatorMesonic::Webartikel.import(update: "all")
+
+    if MercatorMesonic::Webartikel.test_connection
+      MercatorMesonic::Webartikel.import(update: "all")
+    end
+
     ::JobLogger.info("Finished Job: webartikel:import")
     ::JobLogger.info("=" * 50)
   end
@@ -19,7 +23,11 @@ namespace :webartikel do
   task :update => :environment do
     ::JobLogger.info("=" * 50)
     ::JobLogger.info("Started Job: webartikel:update")
-    MercatorMesonic::Webartikel.import(update: "changed")
+
+    if MercatorMesonic::Webartikel.test_connection
+      MercatorMesonic::Webartikel.import(update: "changed")
+    end
+
     ::JobLogger.info("Finished Job: webartikel:update")
     ::JobLogger.info("=" * 50)
   end
@@ -30,7 +38,11 @@ namespace :webartikel do
   task :remove_orphans => :environment do
     ::JobLogger.info("=" * 50)
     ::JobLogger.info("Started Job: webartikel:remove_orphans")
-    MercatorMesonic::Webartikel.remove_orphans
+
+    if MercatorMesonic::Webartikel.test_connection
+      MercatorMesonic::Webartikel.remove_orphans
+    end
+
     ::JobLogger.info("Finished Job: webartikel:remove_orphans")
     ::JobLogger.info("=" * 50)
   end
