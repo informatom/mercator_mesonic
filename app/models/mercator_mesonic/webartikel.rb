@@ -68,18 +68,22 @@ module MercatorMesonic
                                        infinite: true,
                                        just_imported: true)
 
-            if webartikel.Kennzeichen = "T"
+            if webartikel.Kennzeichen == "T"  && webartikel.Artikelnummer != "VERSANDSPESEN"
               @product.topseller = true
               position = 1
               position = @topsellers.categorizations.maximum(:position) + 1 if @topsellers.categorizations.any?
               @product.categorizations.new(category_id: @topsellers.id, position: position)
+            else
+              @product.categorizations.where(category_id: @topsellers.id).destroy_all
             end
 
-            if webartikel.Kennzeichen = "N"
+            if webartikel.Kennzeichen == "N" && webartikel.Artikelnummer != "VERSANDSPESEN"
               @product.novelty = true
               position = 1
               position = @novelties.categorizations.maximum(:position) + 1 if @novelties.categorizations.any?
               @product.categorizations.new(category_id: @novelties.id, position: position)
+            else
+              @product.categorizations.where(category_id: @novelties.id).destroy_all
             end
 
             if webartikel.PreisdatumVON && webartikel.PreisdatumVON <= Time.now &&
@@ -87,6 +91,8 @@ module MercatorMesonic
               position = 1
               position = @discounts.categorizations.maximum(:position) + 1 if @discounts.categorizations.any?
               @product.categorizations.new(category_id: @discounts.id, position: position)
+            else
+              @product.categorizations.where(category_id: @discounts.id).destroy_all
             end
 
             if @inventory.save

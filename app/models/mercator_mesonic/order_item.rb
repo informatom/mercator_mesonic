@@ -15,6 +15,7 @@ module MercatorMesonic
       id = mesonic_order.C000 + "-" + "%06d" % (index + 1 )
       product = lineitem.product
       inventory = product.determine_inventory(amount: lineitem.amount)
+
       self.new(c000: id,
                c003: lineitem.product_number,
                c004: lineitem.description_de,
