@@ -2,24 +2,36 @@
 
 namespace :webartikel do
 
-  # starten als: 'bundle exec rake webartikel:import
+  # starten als: 'bundle exec rake webartikel:import'
   # in Produktivumgebungen: 'bundle exec rake webartikel:import RAILS_ENV=production'
   desc 'Import from Mesonic Webartikel view into inventories'
   task :import => :environment do
+    ::JobLogger.info("=" * 50)
+    ::JobLogger.info("Started Job: webartikel:import")
     MercatorMesonic::Webartikel.import(update: "all")
+    ::JobLogger.info("Finished Job: webartikel:import")
+    ::JobLogger.info("=" * 50)
   end
 
-  # starten als: 'bundle exec rake webartikel:update
+  # starten als: 'bundle exec rake webartikel:update'
   # in Produktivumgebungen: 'bundle exec rake webartikel:update RAILS_ENV=production'
   desc 'Update from Mesonic Webartikel view into inventories'
   task :update => :environment do
+    ::JobLogger.info("=" * 50)
+    ::JobLogger.info("Started Job: webartikel:update")
     MercatorMesonic::Webartikel.import(update: "changed")
+    ::JobLogger.info("Finished Job: webartikel:update")
+    ::JobLogger.info("=" * 50)
   end
 
-    # starten als: 'bundle exec rake webartikel:remove_orphans
+    # starten als: 'bundle exec rake webartikel:remove_orphans'
   # in Produktivumgebungen: 'bundle exec rake webartikel:remove_orphans RAILS_ENV=production'
   desc 'Update from Mesonic Webartikel view into inventories'
   task :remove_orphans => :environment do
+    ::JobLogger.info("=" * 50)
+    ::JobLogger.info("Started Job: webartikel:remove_orphans")
     MercatorMesonic::Webartikel.remove_orphans
+    ::JobLogger.info("Finished Job: webartikel:remove_orphans")
+    ::JobLogger.info("=" * 50)
   end
 end

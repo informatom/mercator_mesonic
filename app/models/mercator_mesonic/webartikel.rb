@@ -21,7 +21,12 @@ module MercatorMesonic
       if @webartikel.any?
         @webartikel.group_by{|webartikel| webartikel.Artikelnummer }.each do |artikelnummer, artikel|
 
-          Inventory.where(number: artikelnummer).destroy_all # This also deletes the prices!
+          @old_inventories = Inventory.where(number: artikelnummer)
+          if ( @old_inventories.destroy_all if @old_inventories )# This also deletes the prices!
+            ::JobLogger.info("Inventories deleted for Product " + artikelnummer)
+          else
+            ::JobLogger.error("Deleting Inventory failed: " + @old_inventories.errors.first)
+          end
 
           artikel.each do |webartikel|
             @product = Product.where(number: webartikel.Artikelnummer).first
@@ -32,8 +37,11 @@ module MercatorMesonic
               @product.categorizations.where(category_id: @discounts.id).destroy_all
               @product.categorizations.where(category_id: @topsellers.id).destroy_all
               if @product.lifecycle.can_reactivate?(User.where(administrator: true).first)
-                @product.lifecycle.reactivate!(User.where(administrator: true).first)
-                puts @product.number + " reactivated"
+                if @product.lifecycle.reactivate!(User.where(administrator: true).first)
+                  ::JobLogger.info("Product " + @product.number + " reactivated.")
+                else
+                  ::JobLogger.error("Product " + @product.number + " could not be reactivated!")
+                end
               end
             else
               @product = Product.create_in_auto(number: webartikel.Artikelnummer,
@@ -81,9 +89,9 @@ module MercatorMesonic
             end
 
             if @inventory.save
-              print "I"
+              ::JobLogger.info("Inventory " + @inventory.number + " saved.")
             else
-              puts @inventory.errors.first.to_s
+              ::JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s)
             end
 
             # ---  Price-Handling --- #
@@ -104,9 +112,9 @@ module MercatorMesonic
             end
 
             if @price.save
-              print "$"
+              ::JobLogger.info("Price for Inventory " + @price.inventory_id.to_s + " saved.")
             else
-              puts @price.errors.first.to_s
+              ::JobLogger.error("Saving Price failed: " +  @price.errors.first.to_s)
             end
 
             # ---  recommendations-Handling --- #
@@ -117,22 +125,25 @@ module MercatorMesonic
             end
 
             if @product.save
-              print "P"
+              ::JobLogger.info("Recommendation for Product " + @product.number + " saved.")
             else
-              puts @inventory.errors.first.to_s
+              ::JobLogger.error("Saving Recommendation failed: " +  @product.errors.first.to_s)
             end
           end
         end
       else
-        puts "No new entries in WEBARTIKEL View"
+        ::JobLogger.info("No new entries in WEBARTIKEL View, nothing updated.")
       end
     end
 
     def self.remove_orphans
       Inventory.all.each do |inventory|
         if MercatorMesonic::Webartikel.where(Artikelnummer: inventory.number).count == 0
-          inventory.destroy
-          puts "Deleted " + inventory.number.to_s
+          if inventory.destroy
+            ::JobLogger.info("Deleted Inventory " + inventory.number.to_s)
+          else
+            ::JobLogger.info("Deleting Inventory failed: " + inventory.errors.first)
+          end
         end
       end
     end
