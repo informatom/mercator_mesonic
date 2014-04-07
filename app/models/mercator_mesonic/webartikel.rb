@@ -4,6 +4,9 @@ module MercatorMesonic
     self.table_name = "WEBARTIKEL"
     self.primary_key = "Artikelnummer"
 
+    has_many :mesonic_prices, :class_name => "Price",
+             :foreign_key => "c000", :primary_key => "Artikelnummer"
+
     # --- Class Methods --- #
 
     def self.import(update: "changed")

@@ -6,7 +6,7 @@ module MercatorMesonic
 
     scope :mesoyear, -> { where(mesoyear: AktMandant.mesoyear) }
     scope :mesocomp, -> { where(mesocomp: AktMandant.mesocomp) }
-    default_scope { mesocomp.mesoyear.where(c002: 3).pluck(:c002, :c001, :c003, :c013) }
+    default_scope { mesocomp.mesoyear.where(c002: 3) }
 
     alias_attribute :price_column, :c013
 
@@ -36,11 +36,11 @@ module MercatorMesonic
     # find regular price
     scope :regular, -> { where(c001: "1") }
 
-    def price
-      self.send( self.class.price_column )
-    end
-
     # --- Instance Methods --- #
+
+    def price
+      self.c013
+    end
 
     def readonly?  # prevents unintentional changes
       true
