@@ -47,6 +47,19 @@ module UserExtensions
                 erp_contact_nr: User.mesoprim(number: @kontaktenummer) )
   end
 
+  def update_mesonic(billing_address: self.billing_addresses.first)
+    mesonic_kontenstamm_adresse = MercatorMesonic::KontenstammAdresse.where(mesoprim: self.erp_account_nr).first
+  # HAS 20140325 Not yet connected to production system, uncomment for persisting erp user date
+  # mesonic_kontenstamm_adresse.update(c050: billing_address.street,
+  #                                    c051: billing_address.postalcode,
+  #                                    c052: billing_address.city,
+  #                                    c053: billing_address.c_o,
+  #                                    c123: billing_address.country,
+  #                                    c180: billing_address.name.split(/\s/).first,
+  #                                    c181: billing_address.name.split(/\s/).last,
+  #                                    c116: billing_address.email_address.to_s)
+  end
+
   def mesonic_account_number
     "%06d" % self.erp_account_nr[2..-11].to_i
   end
