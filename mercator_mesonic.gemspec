@@ -17,4 +17,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rails", "~> 4.0.3"
   s.add_dependency 'activerecord-sqlserver-adapter', '~> 4.0.0'
+  s.add_dependency 'nokogiri'
 end
