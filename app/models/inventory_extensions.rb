@@ -8,6 +8,7 @@ module InventoryExtensions
   end
 
   # --- Instance Methods --- #
+
   def mesonic_price(customer_id: nil )
     customer = User.find(customer_id)
     return nil unless customer && customer.erp_account_nr
