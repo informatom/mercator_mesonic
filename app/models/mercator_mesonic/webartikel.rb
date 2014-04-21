@@ -69,7 +69,8 @@ module MercatorMesonic
                                        erp_provision_code: webartikel.Provisionscode,
                                        erp_characteristic_flag: webartikel.Auspraegungsflag,
                                        infinite: true,
-                                       just_imported: true)
+                                       just_imported: true,
+                                       alternative_number: webartikel.AltArtNr1)
 
             if webartikel.Kennzeichen == "T"  && webartikel.Artikelnummer != "VERSANDSPESEN"
               @product.topseller = true
