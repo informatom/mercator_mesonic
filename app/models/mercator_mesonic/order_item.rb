@@ -88,7 +88,7 @@ module MercatorMesonic
                c104: 0,
                mesocomp: AktMandant.mesocomp,
                mesoyear: AktMandant.mesoyear,
-               mesoprim: id + "-" + AktMandant.mesocomp + "-" + AktMandant.mesoyear,
+               mesoprim: [id, AktMandant.mesocomp, AktMandant.mesoyear].join("-"),
                C106: "",
                C107: 0,
                C108: "",

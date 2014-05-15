@@ -117,7 +117,7 @@ module MercatorMesonic
                C160: 0,
                mesocomp: AktMandant.mesocomp,
                mesoyear: AktMandant.mesoyear,
-               mesoprim: kontonummer + "-" + custom_order_number + "-" + AktMandant.mesocomp + "-" + AktMandant.mesoyear )
+               mesoprim: [kontonummer, custom_order_number, AktMandant.mesocomp, AktMandant.mesoyear].join("-") )
     end
 
     # --- Instance Methods --- #

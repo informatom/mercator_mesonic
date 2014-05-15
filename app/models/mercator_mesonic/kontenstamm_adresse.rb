@@ -61,7 +61,7 @@ module MercatorMesonic
                c116: billing_address.email_address.to_s,
                mesocomp: AktMandant.mesocomp,
                mesoyear: AktMandant.mesoyear,
-               mesoprim: kontonummer.to_s + "-" + AktMandant.mesocomp + "-" + AktMandant.mesoyear.to_s)
+               mesoprim: [kontonummer.to_s, AktMandant.mesocomp, AktMandant.mesoyear.to_s].join("-") )
     end
   end
 end

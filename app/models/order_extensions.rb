@@ -37,7 +37,7 @@ module OrderExtensions
 
       Mailer::OrderMailer.deliver_order_confirmation(order: self)
     else
-      raise "order could not be pushed to mesonic"
+      raise "Error! Order could not be pushed to mesonic!"
     end
   end
 

@@ -52,7 +52,7 @@ module MercatorMesonic
                                                 description: webartikel.comment)
             end
 
-            webartikel.Zusatzfeld5 ? delivery_time =  webartikel.Zusatzfeld5 : delivery_time = "Auf Anfrage"
+            delivery_time =  webartikel.Zusatzfeld5 ? webartikel.Zusatzfeld5 : I18n.t("mercator.on_request")
 
             @inventory = Inventory.new(product_id: @product.id,
                                        number: webartikel.Artikelnummer,
@@ -72,7 +72,8 @@ module MercatorMesonic
                                        just_imported: true,
                                        alternative_number: webartikel.AltArtNr1)
 
-            if webartikel.Kennzeichen == "T"  && webartikel.Artikelnummer != "VERSANDSPESEN"
+            if ( webartikel.Kennzeichen == "T" ) &&
+               ( webartikel.Artikelnummer != Constant.find_by_key("shipping_cost_article").value )
               @product.topseller = true
               position = 1
               position = @topsellers.categorizations.maximum(:position) + 1 if @topsellers.categorizations.any?
@@ -81,7 +82,8 @@ module MercatorMesonic
               @product.categorizations.where(category_id: @topsellers.id).destroy_all
             end
 
-            if webartikel.Kennzeichen == "N" && webartikel.Artikelnummer != "VERSANDSPESEN"
+            if ( webartikel.Kennzeichen == "N" ) &&
+               ( webartikel.Artikelnummer != Constant.find_by_key("shipping_cost_article").value )
               @product.novelty = true
               position = 1
               position = @novelties.categorizations.maximum(:position) + 1 if @novelties.categorizations.any?
@@ -90,8 +92,8 @@ module MercatorMesonic
               @product.categorizations.where(category_id: @novelties.id).destroy_all
             end
 
-            if webartikel.PreisdatumVON && webartikel.PreisdatumVON <= Time.now &&
-               webartikel.PreisdatumBIS && webartikel.PreisdatumBIS >= Time.now
+            if webartikel.PreisdatumVON && ( webartikel.PreisdatumVON <= Time.now ) &&
+               webartikel.PreisdatumBIS && ( webartikel.PreisdatumBIS >= Time.now )
               position = 1
               position = @discounts.categorizations.maximum(:position) + 1 if @discounts.categorizations.any?
               @product.categorizations.new(category_id: @discounts.id, position: position)
@@ -112,8 +114,8 @@ module MercatorMesonic
                                 vat: webartikel.Steuersatzzeile * 10,
                                 inventory_id: @inventory.id)
 
-            if webartikel.PreisdatumVON && webartikel.PreisdatumVON <= Time.now &&
-               webartikel.PreisdatumBIS && webartikel.PreisdatumBIS >= Time.now
+            if webartikel.PreisdatumVON && ( webartikel.PreisdatumVON <= Time.now ) &&
+               webartikel.PreisdatumBIS && ( webartikel.PreisdatumBIS >= Time.now )
               @price.promotion = true
               @price.valid_from = webartikel.PreisdatumVON
               @price.valid_to = webartikel.PreisdatumBIS
@@ -178,7 +180,6 @@ module MercatorMesonic
 
     def self.test_connection
       begin
-        self.count
         ::JobLogger.info("Connection to Mesonic database established successfully.")
         puts "further logging goes to Joblog: /log/RAILS_ENV_job.log ..."
         return true
