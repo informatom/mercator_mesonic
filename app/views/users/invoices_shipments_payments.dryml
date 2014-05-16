@@ -6,25 +6,43 @@
     <section class="content-body">
 
       <ul class="nav nav-tabs">
-        <li class="active"><a href="#invoices" data-toggle="tab">Rechnungen</a></li>
-        <li><a href="#open_shipments" data-toggle="tab">Offene Lieferungen</a></li>
-        <li><a href="#open_payments" data-toggle="tab">Offene Zahlungen</a></li>
+        <li class="active">
+          <a href="#invoices" data-toggle="tab">
+            <t key='mercator.invoice.other'/>
+          </a>
+        </li>
+        <li>
+          <a href="#open_shipments" data-toggle="tab">
+            <t key='mercator.open_deliveries'/>
+          </a>
+        </li>
+        <li>
+          <a href="#open_payments" data-toggle="tab">
+            <t key='mercator.open_payments'/>
+          </a>
+        </li>
       </ul>
 
       <div id="myTabContent" class="tab-content">
         <div class="tab-pane fade in active" id="invoices">
           <repeat with="&@invoices">
-            <h3>Rechnung <view with="&this[0]"/></h3>
-            <strong>Kundennummer:</strong> <view with="&this[1][0].Konto"/>,
-            <strong> Rechnungsdatum:</strong> <view with="&this[1][0].Rechnungsdatum.to_date"/><br/>
+            <h3><t key='mercator.invoice.one'/> <view with="&this[0]"/></h3>
+
+            <p>
+              <strong><t key='mercator.customer_number'/>:</strong>
+              <view with="&this[1][0].Konto"/>,
+              <strong><t key='mercator.invoice.date'/>:</strong>
+              <view with="&this[1][0].Rechnungsdatum.to_date"/>
+            </p>
+
             <table class="table table-striped table-condensed">
               <tr>
-                <th>Bestelltext:</th>
-                <th>ArtNr</th>
-                <th>Bezeichnung</th>
-                <th>Menge</th>
-                <th>Einzelpreis</th>
-                <th>Gesamtpreis</th>
+                <th><t key='mercator.ordering_text'/></th>
+                <th><t key='attributes.product_number'/></th>
+                <th><t key='mercator.identifier'/></th>
+                <th><t key='attributes.amount'/></th>
+                <th><t key='activerecord.attributes.lineitem.product_price'/></th>
+                <th><t key='activerecord.attributes.lineitem.value'/></th>
               </tr>
               <repeat with="&this[1]">
                 <tr>
@@ -38,24 +56,34 @@
               </repeat>
             </table>
           </repeat>
-          <else>keine Rechnungen</else>
+          <else>
+            <t key='mercator.no_invoices'/>
+          </else>
         </div>
 
         <div class="tab-pane fade" id="open_shipments">
           <repeat with="&@open_shipments">
-            <h3>Lieferscheinnummer <view with="&this[0]"/></h3>
-            <strong>Kundennummer:</strong> <view with="&this[1][0].Konto"/>,
-            <strong>Rechnungsdatum:</strong> <view with="&this[1][0].Lieferscheindatum.to_date"/><br/>
-            <strong>Rechnungsnummer:</strong> <view with="&this[1][0].Rechnungsnummer.to_date"/><br/>
-            <strong>Rechnungsdatum:</strong> <view with="&this[1][0].Rechnungsdatum.to_date"/><br/>
+            <h3><t key='mercator.packing_slip_number'/> <view with="&this[0]"/></h3>
+
+            <p>
+              <strong><t key='mercator.customer_number'/>:</strong>
+              <view with="&this[1][0].Konto"/>,
+              <strong><t key='mercator.delivery_slip_date'/>:</strong>
+              <view with="&this[1][0].Lieferscheindatum.to_date"/><br/>
+              <strong><t key='mercator.invoice.number'/>:</strong>
+              <view with="&this[1][0].Rechnungsnummer.to_date"/><br/>
+              <strong><t key='mercator.invoice.date'/>:</strong>
+              <view with="&this[1][0].Rechnungsdatum.to_date"/>
+            </p>
+
             <table class="table table-striped table-condensed">
               <tr>
-                <th>Bestelltext:</th>
-                <th>ArtNr</th>
-                <th>Bezeichnung</th>
-                <th>Menge</th>
-                <th>Einzelpreis</th>
-                <th>Gesamtpreis</th>
+                <th><t key='mercator.ordering_text'/></th>
+                <th><t key='attributes.product_number'/></th>
+                <th><t key='mercator.identifier'/></th>
+                <th><t key='attributes.amount'/></th>
+                <th><t key='activerecord.attributes.lineitem.product_price'/></th>
+                <th><t key='activerecord.attributes.lineitem.value'/></th>
               </tr>
               <repeat with="&this[1]">
                 <tr>
@@ -69,24 +97,32 @@
               </repeat>
             </table>
           </repeat>
-          <else>keine Rechnungen</else>
+          <else><t key='mercator.no_deliveries'/>n</else>
         </div>
 
         <div class="tab-pane fade" id="open_payments">
           <repeat with="&@open_payments">
-            <h3>Rechnungsnummer <view with="&this[0]"/></h3>
-            <strong>Kundennummer:</strong> <view with="&this[1][0].Konto"/>,
-            <strong>Auftragsdatum:</strong> <view with="&this[1][0].Auftragsdatum.to_date"/><br/>
-            <strong>Auftragsnummer:</strong> <view with="&this[1][0].Auftragsnummer.to_date"/><br/>
-            <strong>Rechnungsdatum:</strong> <view with="&this[1][0].Rechnungsdatum.to_date"/><br/>
+            <h3><t key='mercator.delivery_number'/> <view with="&this[0]"/></h3>
+
+            <p>
+              <strong><t key='mercator.customer_number'/>:</strong>
+              <view with="&this[1][0].Konto"/>,
+              <strong><t key='mercator.order.date'/>:</strong>
+              <view with="&this[1][0].Auftragsdatum.to_date"/><br/>
+              <strong><t key='mercator.order.number'/>:</strong>
+              <view with="&this[1][0].Auftragsnummer.to_date"/><br/>
+              <strong><t key='mercator.invoice.date'/>:</strong>
+              <view with="&this[1][0].Rechnungsdatum.to_date"/>
+            </p>
+
             <table class="table table-striped table-condensed">
               <tr>
-                <th>Bestelltext:</th>
-                <th>ArtNr</th>
-                <th>Bezeichnung</th>
-                <th>Menge</th>
-                <th>Einzelpreis</th>
-                <th>Gesamtpreis</th>
+                <th><t key='mercator.order.text'/></th>
+                <th><t key='attributes.product_number'/></th>
+                <th><t key='mercator.identifier'/></th>
+                <th><t key='attributes.amount'/></th>
+                <th><t key='activerecord.attributes.lineitem.product_price'/></th>
+                <th><t key='activerecord.attributes.lineitem.value'/></th>
               </tr>
               <repeat with="&this[1]">
                 <tr>
@@ -100,7 +136,7 @@
               </repeat>
             </table>
           </repeat>
-          <else>keine Rechnungen</else>
+          <else><t key='mercator.no_open_payments'/></else>
         </div>
       </div>
     </section>
