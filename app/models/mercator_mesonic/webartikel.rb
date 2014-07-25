@@ -21,8 +21,11 @@ module MercatorMesonic
         @webartikel = Webartikel.all
       end
 
+      amount = @webartikel.count
+      index = 0
       if @webartikel.any?
         @webartikel.group_by{|webartikel| webartikel.Artikelnummer }.each do |artikelnummer, artikel|
+          index = index + 1
 
           @old_inventories = Inventory.where(number: artikelnummer)
           if ( @old_inventories.destroy_all if @old_inventories )# This also deletes the prices!
@@ -143,15 +146,18 @@ module MercatorMesonic
               ::JobLogger.error("Saving Recommendation failed: " +  @product.errors.first.to_s)
             end
           end
+          ::JobLogger.info("----- Finished: " + artikelnummer.to_s + " (" +  index.to_s + "/" + amount.to_s + ") -----")
         end
       else
         ::JobLogger.info("No new entries in WEBARTIKEL View, nothing updated.")
       end
+
       self.remove_orphans(only_old: true)
 
       ::JobLogger.info("Deprecating products ... ")
       ::Product.deprecate
     end
+
 
     def self.remove_orphans(only_old: false)
       ::JobLogger.info("Removing orphans ...")
@@ -171,15 +177,17 @@ module MercatorMesonic
           ::JobLogger.info("Inventory " + inventory.number.to_s + " still present in MercatorMesonic::Webartikel.")
         end
       end
-      ::JobLogger.info("Resetting new inventiories ...")
+      ::JobLogger.info("Resetting new inventories ...")
       Inventory.where(just_imported: true).each do |inventory|
         inventory.update_attributes(just_imported: false)
       end
       ::JobLogger.info("... completed, removing orphans finished.")
     end
 
+
     def self.test_connection
       begin
+        self.count # that actually tries to establish a connection
         ::JobLogger.info("Connection to Mesonic database established successfully.")
         puts "further logging goes to Joblog: /log/RAILS_ENV_job.log ..."
         return true
