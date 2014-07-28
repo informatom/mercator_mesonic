@@ -34,7 +34,7 @@ namespace :webartikel do
 
     # starten als: 'bundle exec rake webartikel:remove_orphans'
   # in Produktivumgebungen: 'bundle exec rake webartikel:remove_orphans RAILS_ENV=production'
-  desc 'Update from Mesonic Webartikel view into inventories'
+  desc 'Remove ophaned inventories'
   task :remove_orphans => :environment do
     ::JobLogger.info("=" * 50)
     ::JobLogger.info("Started Job: webartikel:remove_orphans")
