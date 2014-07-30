@@ -3,7 +3,7 @@ module OrderExtensions
   # --- Instance Methods --- #
   def mesonic_payment_id
     {"cash_payment" => '1002', "atm_payment" => '1003', "pre_payment" => '1010', "e_payment" => '1011'}[self.billing_method]
-    # further Mesonic ids nachnahme => '1001'
+    # further Mesonic ids Nachnahme => '1001'
   end
 
   def mesonic_payment_id2
