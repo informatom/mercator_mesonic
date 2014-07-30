@@ -57,7 +57,11 @@ module MercatorMesonic
 
     # --- Instance Methods --- #
     def full_name
-      self.c001 + "-" + self.c002
+      (self.c001 or "---") + " - " + (self.c002 or "---")
+    end
+
+    def to_s
+      self.full_name
     end
   end
 end

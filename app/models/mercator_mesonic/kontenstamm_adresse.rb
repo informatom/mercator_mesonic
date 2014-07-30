@@ -46,6 +46,10 @@ module MercatorMesonic
       [ self.tel_land, self.tel_city, self.fax ].join(" ")
     end
 
+    def to_s
+      (self.postal or "") + (self.city or "") + "," + (self.street or "")
+    end
+
     #--- Class Methods --- #
 
     def self.default_order

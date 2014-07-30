@@ -16,8 +16,6 @@ module MercatorMesonic
     has_one :belegart,       :class_name => "Belegart",    :foreign_key => "c030", :primary_key => "c077"
     has_many :zahlungsarten, :class_name => "Zahlungsart", :foreign_key => "c000", :primary_key => "c077"
 
-    alias_attribute :name, :c112
-
     # --- Class Methods --- #
     def self.default_order
       :mesoprim
@@ -35,6 +33,12 @@ module MercatorMesonic
                mesocomp: AktMandant.mesocomp,
                mesoyear: AktMandant.mesoyear,
                mesoprim: [kontonummer.to_s, AktMandant.mesocomp, AktMandant.mesoyear.to_s].join("-"))
+    end
+
+    # --- Instance Methods --- #
+
+    def to_s
+      self.c112
     end
   end
 end

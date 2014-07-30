@@ -62,5 +62,9 @@ module MercatorMesonic
     def interessent?
       !self.kunde?
     end
+
+    def to_s
+      self.name
+    end
   end
 end

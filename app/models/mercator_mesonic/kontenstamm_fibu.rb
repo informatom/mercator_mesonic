@@ -37,5 +37,10 @@ module MercatorMesonic
                mesoyear: AktMandant.mesoyear,
                mesoprim: [kontonummer.to_s, AktMandant.mesocomp, AktMandant.mesoyear.to_s].join("-") )
     end
+
+    # --- Instance Methods --- #
+    def to_s
+      self.kontonummer
+    end
   end
 end
