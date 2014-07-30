@@ -7,7 +7,7 @@ module UserExtensions
                     :mesonic_kontenstamm_fibu, :mesonic_kontenstamm_adresse
 
     belongs_to :mesonic_kontakte_stamm, class_name: "MercatorMesonic::KontakteStamm",
-               foreign_key: :erp_account_nr, primary_key: :mesoprim
+               foreign_key: :erp_contact_nr, primary_key: :mesoprim
 
     belongs_to :mesonic_kontenstamm, class_name: "MercatorMesonic::Kontenstamm",
                foreign_key: :erp_account_nr, primary_key: :mesoprim

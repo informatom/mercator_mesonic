@@ -61,7 +61,7 @@ module MercatorMesonic
     end
 
     def to_s
-      self.full_name
+      self.kontonummer + self.full_name
     end
   end
 end
