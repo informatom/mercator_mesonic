@@ -16,6 +16,8 @@ module MercatorMesonic
     has_one :belegart,       :class_name => "Belegart",    :foreign_key => "c030", :primary_key => "c077"
     has_many :zahlungsarten, :class_name => "Zahlungsart", :foreign_key => "c000", :primary_key => "c077"
 
+    alias_attribute :name, :c112
+
     # --- Class Methods --- #
     def self.default_order
       :mesoprim
