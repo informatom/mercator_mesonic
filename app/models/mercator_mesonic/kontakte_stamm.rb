@@ -27,7 +27,7 @@ module MercatorMesonic
     delegate :telephone, :fax, :uid_number, to: :kontenstamm_adresse
 
     # --- Class Methods --- #
-    def self.set_default_order
+    def self.default_order
       :mesoprim
     end
 
