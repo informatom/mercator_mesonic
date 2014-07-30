@@ -17,6 +17,9 @@ module MercatorMesonic
     has_many :zahlungsarten, :class_name => "Zahlungsart", :foreign_key => "c000", :primary_key => "c077"
 
     # --- Class Methods --- #
+    def self.default_order
+      :mesoprim
+    end
 
     def self.initialize_mesonic(kontonummer: nil)
       self.new(c060: 0, c062: 0, c068: 0, c070: 0, c071: 0, c072: 0, c108: 0, c109: 0, c110: 0, c111: 0,

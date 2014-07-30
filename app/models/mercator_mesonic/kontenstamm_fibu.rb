@@ -18,6 +18,10 @@ module MercatorMesonic
     alias_attribute :kontonummer, :c104
 
     # --- Class Methods --- #
+    def self.default_order
+      :mesoprim
+    end
+
 
     def self.initialize_mesonic(kontonummer: nil)
       self.new(c005: 0, c006: 0, c009: 0, c012: 0, c057: 0, c058: 0, c059: 0, c061: 0, c063: 0, c067: 0,

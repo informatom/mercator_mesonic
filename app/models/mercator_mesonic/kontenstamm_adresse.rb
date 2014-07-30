@@ -48,6 +48,10 @@ module MercatorMesonic
 
     #--- Class Methods --- #
 
+    def self.default_order
+      :mesoprim
+    end
+
     def self.initialize_mesonic(billing_address: nil, kontonummer: nil)
       self.new(c157: 0, c182: 0, C241: 0,
                c050: billing_address.street,

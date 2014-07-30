@@ -21,6 +21,9 @@ module MercatorMesonic
     has_one :kontenstamm_adresse, :class_name => "KontenstammAdresse", :foreign_key => "C001", :primary_key => "c002"
 
     # --- Class Methods --- #
+    def self.default_order
+      :mesoprim
+    end
 
     def self.next_kontonummer
       last_kontonummer = self.interessenten.first.c002.split("I").last.to_i
