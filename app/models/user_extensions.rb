@@ -66,21 +66,20 @@ module UserExtensions
   def update_mesonic(billing_address: self.billing_addresses.first)
     mesonic_kontenstamm_adresse = MercatorMesonic::KontenstammAdresse.where(mesoprim: self.erp_account_nr).first
 
-   ::JobLogger.debug("bisher:")
-   ::JobLogger.debug(mesonic_kontenstamm_adresse)
-   ::JobLogger.debug("dann:")
-   ::JobLogger.debug({c050: billing_address.street, c051: billing_address.postalcode, c052: billing_address.city,
-                      c053: billing_address.c_o, c123: billing_address.country, c181: billing_address.name.split(/\s/).last,
-                      c116: billing_address.email_address.to_s})
+    #::JobLogger.debug("bisher:")
+    #::JobLogger.debug(mesonic_kontenstamm_adresse)
+    #::JobLogger.debug("dann:")
+    #::JobLogger.debug({c050: billing_address.street, c051: billing_address.postalcode, c052: billing_address.city,
+    #                   c053: billing_address.c_o, c123: billing_address.country, c181: billing_address.name.split(/\s/).last,
+    #                   c116: billing_address.email_address.to_s})
 
-  # HAS 20140325 Not yet connected to production system, uncomment for persisting erp user date
-  # mesonic_kontenstamm_adresse.update(c050: billing_address.street,
-  #                                    c051: billing_address.postalcode,
-  #                                    c052: billing_address.city,
-  #                                    c053: billing_address.c_o,
-  #                                    c123: billing_address.country,
-  #                                    c181: billing_address.name.split(/\s/).last,
-  #                                    c116: billing_address.email_address.to_s)
+   mesonic_kontenstamm_adresse.update(c050: billing_address.street,
+                                      c051: billing_address.postalcode,
+                                      c052: billing_address.city,
+                                      c053: billing_address.c_o,
+                                      c123: billing_address.country,
+                                      c181: billing_address.name.split(/\s/).last,
+                                      c116: billing_address.email_address.to_s)
   end
 
   def mesonic_account_number
