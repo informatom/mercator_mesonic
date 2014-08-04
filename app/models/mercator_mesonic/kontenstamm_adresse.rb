@@ -4,7 +4,7 @@ module MercatorMesonic
     self.table_name = "T051"
     self.primary_key = "mesoprim"
 
-    attr_accessible :firstname, :lastname, :c001, :c116, :c157, :c180, :c181, :c182, :C241, :c050,
+    attr_accessible :firstname, :lastname, :c001, :c053, :c116, :c157, :c180, :c181, :c182, :C241, :c050,
                     :c051, :c052, :c123, :mesocomp, :mesoyear, :mesoprim
 
     scope :mesoyear, -> { where(mesoyear: AktMandant.mesoyear) }
@@ -25,9 +25,7 @@ module MercatorMesonic
     alias_attribute :email, :c116
     alias_attribute :web , :c128
 
-    attr_accessor :name
-
-    validates_presence_of :name, :on => :create
+    validates_presence_of :lastname, :on => :create
     validates_presence_of :street
     validates_presence_of :city
     validates_presence_of :postal

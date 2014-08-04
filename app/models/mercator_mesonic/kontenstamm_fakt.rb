@@ -30,6 +30,7 @@ module MercatorMesonic
                c077: "21",
                c107: "017",
                c112: kontonummer,
+               c121: 1,
                mesocomp: AktMandant.mesocomp,
                mesoyear: AktMandant.mesoyear,
                mesoprim: [kontonummer.to_s, AktMandant.mesocomp, AktMandant.mesoyear.to_s].join("-"))

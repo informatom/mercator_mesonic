@@ -6,7 +6,7 @@ module MercatorMesonic
 
     attr_accessible :c005, :c012, :c007, :c008, :c100, :c104, :c009, :c163, :c174, :C185, :c153, :c164, :c175,
                     :c176, :C186, :c067, :C189, :c058, :c124, :c135, :C190, :c057, :c059, :c114, :c136, :c115,
-                    :c137, :c006, :c061, :c063, :c151, :c173, :c177, :mesocomp, :mesoyear, :mesoprim
+                    :c117, :c137, :c006, :c061, :c063, :c151, :c173, :mesocomp, :mesoyear, :mesoprim
 
     scope :mesoyear, -> { where(mesoyear: AktMandant.mesoyear) }
     scope :mesocomp, -> { where(mesocomp: AktMandant.mesocomp) }
@@ -31,7 +31,7 @@ module MercatorMesonic
                c008: "1300",
                c100: "017",
                c104: kontonummer,
-               c177: kontonummer,
+               c117: kontonummer,
                c163: -1,
                mesocomp: AktMandant.mesocomp,
                mesoyear: AktMandant.mesoyear,
