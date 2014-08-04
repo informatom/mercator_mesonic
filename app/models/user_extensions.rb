@@ -42,7 +42,7 @@ module UserExtensions
 
     if [@mesonic_kontakte_stamm, @mesonic_kontenstamm, @mesonic_kontenstamm_adresse, @mesonic_kontenstamm_fibu, @mesonic_kontenstamm_fakt ].collect(&:valid?).all?
       [@mesonic_kontakte_stamm, @mesonic_kontenstamm, @mesonic_kontenstamm_adresse,
-       @mesonic_kontenstamm_fibu, @mesonic_kontenstamm_fakt ].collect(&:save?).all?
+       @mesonic_kontenstamm_fibu, @mesonic_kontenstamm_fakt ].collect(&:save).all?
     end
 
     self.update(erp_account_nr: User.mesoprim(number: @kontonummer),
