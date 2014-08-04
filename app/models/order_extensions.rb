@@ -7,7 +7,7 @@ module OrderExtensions
   end
 
   def mesonic_payment_id2
-    {"1002" => "17", "1003" => "17", "1010" => "19", "1011" => "25" }[self.payment_id]
+    {"1002" => "17", "1003" => "17", "1010" => "19", "1011" => "25" }[self.mesonic_payment_id]
     # "1001" => "17"
   end
 
@@ -25,17 +25,26 @@ module OrderExtensions
                                                                            index: index)
     end
 
+    ::JobLogger.debug(mesonic_order)
+    mesonic_order_items.each do |mesonic_order_item|
+      ::JobLogger.debug(mesonic_order_item)
+    end
+
     save_return_value = Order.transaction do
-      mesonic_order.save
-      mesonic_order_items.collect(&:save)
+#   mesonic_order.save
+#   mesonic_order_items.collect(&:save)
+
+# Vergleichsbelege
+# Kunde: 260616 Laufnummer 140402102600156000
+# Kunde: 09WEB Laufnummer 140402102726592000
     end
 
     if save_return_value
-      self.update(erp_customer_number: self.user.erp_account_nr,
-                  erp_billing_number: mesonic_order.c021,
-                  erp_order_number: mesonic_order.c022)
+#      self.update(erp_customer_number: self.user.erp_account_nr,
+#                  erp_billing_number: mesonic_order.c021,
+#                  erp_order_number: mesonic_order.c022)
 
-      Mailer::OrderMailer.deliver_order_confirmation(order: self)
+#      Mailer::OrderMailer.deliver_order_confirmation(order: self)
     else
       raise "Error! Order could not be pushed to mesonic!"
     end

@@ -15,10 +15,13 @@ module MercatorMesonic
       customer = order.user
       timestamp = Time.now
       mesonic_kontenstamm_fakt = customer.mesonic_kontenstamm_fakt
-      custom_order_number |= timestamp.strftime('%y%m%d%H%M%S') + timestamp.usec # timestamp, if custom order number not provided
-      kontonummer = @customer.mesonic_kontenstamm.try(:kunde?) ? @customer.mesonic_kontenstamm.kontonummer : "09WEB"
+      custom_order_number ||= timestamp.strftime('%y%m%d%H%M%S') + timestamp.usec.to_s # timestamp, if custom order number not provided
+      kontonummer = customer.mesonic_kontenstamm.try(:kunde?) ? customer.mesonic_kontenstamm.kontonummer : "09WEB"
       usernummer = customer.erp_contact_nr ? customer.erp_contact_nr : customer.id
       billing_method = order.mesonic_payment_id == 1004 ? mesonic_kontenstamm_fakt.c107 : order.mesonic_payment_id2 #HAS 20140325 FIXME
+
+      billing_state_code = Country.where{(name_de == order.billing_country) | (name_en == order.billing_country)}.first.code
+      shipping_state_code = Country.where{(name_de == order.shipping_country) | (name_en == order.shipping_country)}.first.code
 
       self.new(c000: kontonummer + "-" + custom_order_number,
                c004: order.billing_name,
@@ -29,10 +32,10 @@ module MercatorMesonic
                c010: order.shipping_name,
                c011: order.shipping_c_o,
                c012: order.shipping_street,
-               c013: order.shipping_postal,
-               c014: order.shipping_postalcode,
-               c017: order.billing_state_code,
-               c019: order.shipping_state_code,
+               c013: order.shipping_postalcode,
+               c014: order.shipping_city,
+               c017: billing_state_code,
+               c019: shipping_state_code,
                c020: usernummer,
                c021: kontonummer,
                c022: custom_order_number,
