@@ -1,8 +1,17 @@
 module MercatorMesonic
   class Order < Base
 
-    self.table_name = "t025"
+    self.table_name = "T025"
     self.primary_key = "C000"
+
+    attr_accessible :c000, :c004, :c005, :c006, :c007, :c008, :c010, :c011, :c012, :c013, :c014, :c017, :c019,
+                    :c020, :c021, :c022, :c023, :c024, :c025, :c026, :c027, :c030, :c034, :c035, :c036, :c037,
+                    :c038, :c039, :c040, :c041, :c047, :c049, :c050, :c051, :c053, :c054, :c056, :c057, :c059,
+                    :c074, :c075, :c076, :c077, :c078, :c080, :c081, :c082, :c086, :c088, :c089, :c090, :c091,
+                    :c092, :c093, :c094, :c095, :c096, :c097, :c098, :c099, :c100, :c102, :c103, :c104, :c105,
+                    :c106, :c109, :c111, :c113, :c114, :c115, :c116, :c117, :c118, :c120, :c121, :c123, :c126,
+                    :c127, :c137, :c139, :c140, :c141, :c142, :c143, :C151, :C152, :C153, :C154, :C155, :C156,
+                    :C157, :C158, :C159, :C160, :mesocomp, :mesoyear, :mesoprim
 
     scope :mesoyear, -> { where(mesoyear: AktMandant.mesoyear) }
     scope :mesocomp, -> { where(mesocomp: AktMandant.mesocomp) }
@@ -44,7 +53,7 @@ module MercatorMesonic
                c025: "N", # durckstatus lieferschein
                c026: "N", # druckstatus faktura
                c027: timestamp, # datum angebot
-               c030: customer.erp_account_nr, #### konto-lieferadresse
+               c030: customer.mesonic_account_number, #### konto-lieferadresse
                c034: mesonic_kontenstamm_fakt.belegart.c014, # belegart
                c035: mesonic_kontenstamm_fakt.c077, # belegart
                c036: mesonic_kontenstamm_fakt.c065, # vertreternummer
@@ -80,7 +89,7 @@ module MercatorMesonic
                c094: 0, # methode
                c095: 0, # ausprägung 1
                c096: 0, # ausprägung 2
-               c097: order.mesonic_billing_id, #HAS 20140325 FIXME (double check)
+               c097: order.mesonic_payment_id, # Zahlungsart
                c098: 101, # freigabekontrolle angebot
                c099: order.sum_incl_vat, # kumulierter zahlungsbetrag
                c100: order.sum_incl_vat, # endbetrag
@@ -91,7 +100,7 @@ module MercatorMesonic
                c106: 0, # fremdwährungskurs
                c109: -1, # kontrakttyp
                c111: 2, # exim durchgeführte änderungen
-               c113: c021, #  c113: "09WEB" # konto rechnungsadresse
+               c113: kontonummer, # konto rechnungsadresse
                c114: 0, # anzahlungsbetrag
                c115: 101, # freigabekontrolle auftrag
                c116: 101, # freigabekontrolle lieferschein
@@ -121,12 +130,6 @@ module MercatorMesonic
                mesocomp: AktMandant.mesocomp,
                mesoyear: AktMandant.mesoyear,
                mesoprim: [kontonummer, custom_order_number, AktMandant.mesocomp, AktMandant.mesoyear].join("-") )
-    end
-
-    # --- Instance Methods --- #
-
-    def readonly?  # prevents unintentional changes
-      true
     end
   end
 end

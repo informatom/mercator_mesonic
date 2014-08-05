@@ -21,16 +21,17 @@ module MercatorMesonic
       :mesoprim
     end
 
-    def self.initialize_mesonic(kontonummer: nil)
+    def self.initialize_mesonic(kontonummer: nil, email: nil)
       self.new(c060: 0, c062: 0, c068: 0, c070: 0, c071: 0, c072: 0, c108: 0, c109: 0, c110: 0, c111: 0,
-               c113: 0, c120: "0", c132: 0, c133: 0, c134: 0, c148: 0, c149: 0, c150: 0, c171: 0, c183: 0,
-               C184: 0,
+               c113: 0, c120: "0", c132: 0, c133: 0, c134: 0, c148: 0, c149: 0, c150: 0, c171: 0, C184: 0,
                c065: 99,
                c066: 3,
                c077: "21",
                c107: "017",
                c112: kontonummer,
                c121: 1,
+               c183: 3, # E-Mail Fakkturen
+               C187: email,
                mesocomp: AktMandant.mesocomp,
                mesoyear: AktMandant.mesoyear,
                mesoprim: [kontonummer.to_s, AktMandant.mesocomp, AktMandant.mesoyear.to_s].join("-"))

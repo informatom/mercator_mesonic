@@ -5,7 +5,7 @@ module MercatorMesonic
     self.primary_key = "mesoprim"
 
     attr_accessible :c039, :id, :c000, :c025, :c033, :c035, :c040, :c042, :c043, :c054,
-                    :c059, :c060, :C061, :mesocomp, :mesoyear, :mesoprim
+                    :c059, :c060, :C061, :C069, :mesocomp, :mesoyear, :mesoprim
 
     scope :mesoyear, -> { where(mesoyear: AktMandant.mesoyear) }
     scope :mesocomp, -> { where(mesocomp: AktMandant.mesocomp) }
@@ -50,6 +50,7 @@ module MercatorMesonic
                c000:     kontaktenummer,
                c025:     user.email_address.to_s,
                C061:     kontaktenummer,
+               C069:     4,
                mesocomp: AktMandant.mesocomp,
                mesoyear: AktMandant.mesoyear,
                mesoprim: kontaktenummer.to_s + "-" + AktMandant.mesocomp + "-" + AktMandant.mesoyear.to_s)

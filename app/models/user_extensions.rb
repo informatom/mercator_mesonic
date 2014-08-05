@@ -36,13 +36,16 @@ module UserExtensions
 
     @mesonic_kontakte_stamm = MercatorMesonic::KontakteStamm.initialize_mesonic(user: self, kontonummer: @kontonummer, kontaktenummer: @kontaktenummer)
     @mesonic_kontenstamm  = MercatorMesonic::Kontenstamm.initialize_mesonic(user: self, kontonummer: @kontonummer, timestamp: @timestamp)
-    @mesonic_kontenstamm_fakt = MercatorMesonic::KontenstammFakt.initialize_mesonic(kontonummer: @kontonummer)
+    @mesonic_kontenstamm_fakt = MercatorMesonic::KontenstammFakt.initialize_mesonic(kontonummer: @kontonummer, email: self.email_address)
     @mesonic_kontenstamm_fibu = MercatorMesonic::KontenstammFibu.initialize_mesonic(kontonummer: @kontonummer)
     @mesonic_kontenstamm_adresse =  MercatorMesonic::KontenstammAdresse.initialize_mesonic(billing_address: self.billing_addresses.first, kontonummer: @kontonummer)
 
-    if [@mesonic_kontakte_stamm, @mesonic_kontenstamm, @mesonic_kontenstamm_adresse, @mesonic_kontenstamm_fibu, @mesonic_kontenstamm_fakt ].collect(&:valid?).all?
+    if [@mesonic_kontakte_stamm, @mesonic_kontenstamm, @mesonic_kontenstamm_adresse,
+        @mesonic_kontenstamm_fibu, @mesonic_kontenstamm_fakt ].collect(&:valid?).all?
+
       [@mesonic_kontakte_stamm, @mesonic_kontenstamm, @mesonic_kontenstamm_adresse,
        @mesonic_kontenstamm_fibu, @mesonic_kontenstamm_fakt ].collect(&:save).all?
+
     end
 
     self.update(erp_account_nr: User.mesoprim(number: @kontonummer),
@@ -62,6 +65,6 @@ module UserExtensions
   end
 
   def mesonic_account_number
-    "%06d" % self.erp_account_nr[2..-11].to_i
+    "%06d" % self.erp_account_nr[0..-11] # ...it is actually a string and may contain 1I for potential buyers
   end
 end

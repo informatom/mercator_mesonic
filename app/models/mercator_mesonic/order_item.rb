@@ -3,6 +3,12 @@ module MercatorMesonic
 
     self.table_name = "T026"
     self.primary_key = "c000"
+    attr_accessible :c000, :c003, :c004, :c005, :c006, :c007, :c008, :c009, :c010, :c011, :c012, :c013, :c014,
+                    :c015, :c016, :c018, :c019, :c020, :c021, :c022, :c023, :c024, :c025, :c026, :c027, :c031,
+                    :c032, :c033, :c034, :c035, :c042, :c044, :c045, :c046, :c047, :c048, :c052, :c054, :c055,
+                    :c056, :c057, :c058, :c059, :c060, :c061, :c062, :c063, :c068, :c070, :c071, :c072, :c073,
+                    :c074, :c075, :c077, :c078, :c081, :c082, :c083, :c085, :c086, :c087, :c088, :c091, :c092,
+                    :c098, :c099, :c100, :c101, :c104, :C106, :C107, :C108, :C109, :mesocomp, :mesoyear, :mesoprim
 
     belongs_to :inventory, :foreign_key => "C003"
 
@@ -12,7 +18,7 @@ module MercatorMesonic
     # --- Class Methods --- #
 
     def self.initialize_mesonic(mesonic_order: nil, lineitem: nil, customer: nil, index: nil)
-      id = mesonic_order.C000 + "-" + "%06d" % (index + 1 )
+      id = mesonic_order.c000 + "-" + "%06d" % (index + 1 )
       product = lineitem.product
       inventory = product.determine_inventory(amount: lineitem.amount)
 
@@ -55,7 +61,7 @@ module MercatorMesonic
                c052: 0, # stat. wert
                c054: 0, # bewertungspreis editieren
                c055: inventory.erp_characteristic_flag, #Ausprägungsflag
-               c056: customer.erp_account_nr, # interessentenkontonummer
+               c056: customer.mesonic_account_number, # interessentenkontonummer
                c057: 0, # lagerbestand ändern J/N
                c058: 0, # key für dispozeile
                c059: 0, # zeilennummer d kundenauftrags
@@ -93,12 +99,6 @@ module MercatorMesonic
                C107: 0,
                C108: "",
                C109: 0 )
-    end
-
-    # --- Instance Methods --- #
-
-    def readonly?  # prevents unintentional changes
-      true
     end
   end
 end
