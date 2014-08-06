@@ -38,7 +38,8 @@ module OrderExtensions
                   erp_billing_number: mesonic_order.c021,
                   erp_order_number: mesonic_order.c022)
 
-      Mailer::OrderMailer.deliver_order_confirmation(order: self)
+      # 20140806:HAS FIXME! Is not yet implemented
+      # Mailer::OrderMailer.deliver_order_confirmation(order: self)
     else
       raise "Error! Order could not be pushed to mesonic!"
     end
