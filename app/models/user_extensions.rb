@@ -24,6 +24,11 @@ module UserExtensions
     belongs_to :mesonic_kontenstamm_adresse, class_name: "MercatorMesonic::KontenstammAdresse",
                foreign_key: :erp_account_nr, primary_key: :mesoprim
     accepts_nested_attributes_for :mesonic_kontenstamm_adresse, allow_destroy: false
+
+    def self.update_erp_account_nrs
+      erp_users = User.where.not(erp_contact_nr: nil)
+      erp_users.each {|erp_user| erp_user.update_erp_account_nr}
+    end
   end
 
   # --- Instance Methods --- #
@@ -66,5 +71,19 @@ module UserExtensions
 
   def mesonic_account_number
     "%06d" % self.erp_account_nr[0..-11] # ...it is actually a string and may contain 1I for potential buyers
+  end
+
+  def update_erp_account_nr
+    # We want to fix the local database entry for erp_account_nr if someone changed the Account on mesonic side,
+    # e.g. if the potential customer ('Interessent') was changed to an actual customer accout.
+    if self.erp_contact_nr && !self.mesonic_kontenstamm && self.mesonic_kontakte_stamm
+      mesonic_kontenstamm = MercatorMesonic::Kontenstamm.where(c002: self.mesonic_kontakte_stamm.c039).first
+
+      if self.update(erp_account_nr: mesonic_kontenstamm.mesoprim)
+        ::JobLogger.info("Updated user " + self.id.to_s + "'s erp account number to " + self.erp_account_nr)
+      else
+        ::JobLogger.error("Error updating user" + self.id.to_s + "'s erp account number")
+      end
+    end
   end
 end

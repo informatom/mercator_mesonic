@@ -43,5 +43,4 @@ module OrderExtensions
       raise "Error! Order could not be pushed to mesonic!"
     end
   end
-
 end

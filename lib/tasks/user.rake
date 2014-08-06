@@ -2,6 +2,19 @@
 require "squeel"
 
 namespace :mesonic do
+  namespace :users do
+    # starten als: 'bundle exec rake mesonic:users:update_erp_account_nrs'
+    # in Produktivumgebungen: 'bundle exec rake mesonic:users:update_erp_account_nrs RAILS_ENV=production'
+    desc 'Update erp account nrs via erp contact numbers from Mesonic '
+    task :update_erp_account_nrs => :environment do
+      ::JobLogger.info("=" * 50)
+      ::JobLogger.info("Started Job: mesonic:users:update_erp_account_nrs")
+      User.update_erp_account_nrs
+      ::JobLogger.info("Finished Job: mesonic:users:update_erp_account_nrs")
+      ::JobLogger.info("=" * 50)
+    end
+  end
+
   namespace :addresses do
 
     # starten als: 'bundle exec rake mesonic:addresses:import'
