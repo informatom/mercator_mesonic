@@ -41,7 +41,7 @@ module UserExtensions
 
     @mesonic_kontakte_stamm = MercatorMesonic::KontakteStamm.initialize_mesonic(user: self,
                                                                                 kontonummer: @kontonummer,
-                                                                                kontaktenummer: @kontaktenummer
+                                                                                kontaktenummer: @kontaktenummer,
                                                                                 billing_address: self.billing_addresses.last)
     @mesonic_kontenstamm  = MercatorMesonic::Kontenstamm.initialize_mesonic(user: self,
                                                                             kontonummer: @kontonummer,
