@@ -4,7 +4,7 @@ module MercatorMesonic
     self.table_name = "T051"
     self.primary_key = "mesoprim"
 
-    attr_accessible :firstname, :lastname, :c001, :c053, :c116, :c157, :c180, :c181, :c182, :C241, :c050,
+    attr_accessible :firstname, :lastname, :c001, :c019, :c053, :c116, :c157, :c179, :c180, :c181, :c182, :C241, :c050,
                     :c051, :c052, :c123, :mesocomp, :mesoyear, :mesoprim
 
     scope :mesoyear, -> { where(mesoyear: AktMandant.mesoyear) }
@@ -56,13 +56,15 @@ module MercatorMesonic
 
     def self.initialize_mesonic(billing_address: nil, kontonummer: nil)
       self.new(c157: 0, c182: 0, C241: 0,
+               c019: billing_address.phone,
                c050: billing_address.street,
                c051: billing_address.postalcode,
                c052: billing_address.city,
-               c053: billing_address.c_o,
+               c053: billing_address.detail,
                c123: billing_address.country,
-               c180: billing_address.name.split(/\s/).first,
-               c181: billing_address.name.split(/\s/).last,
+               c179: billing_address.title,
+               c180: billing_address.first_name,
+               c181: billing_address.surname,
                c001: kontonummer,
                c116: billing_address.email_address.to_s,
                mesocomp: AktMandant.mesocomp,
