@@ -74,7 +74,7 @@ module UserExtensions
                                        c053: billing_address.detail,
                                        c123: billing_address.country,
                                        c179: billing_address.title,
-                                       c180: billing_address.first_name
+                                       c180: billing_address.first_name,
                                        c181: billing_address.surname,
                                        c116: billing_address.email_address.to_s)
   end
