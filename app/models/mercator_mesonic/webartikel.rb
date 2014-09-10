@@ -204,7 +204,7 @@ module MercatorMesonic
       group(:Artikelnummer).count.select{ |key,value| value > 1 }.keys
     end
 
-    def duplicates
+    def self.duplicates
       article_numbers = []
       non_unique.each do |article_number|
         if where(Artikelnummer: article_number)[0].attributes.to_a - where(Artikelnummer: article_number)[1].attributes.to_a == []
