@@ -214,6 +214,13 @@ module MercatorMesonic
       return article_numbers
     end
 
+    def self.differences
+      non_unique.each do |article_number|
+        ::JobLogger.info(article_number + ": " +
+                         where(Artikelnummer: article_number)[0].different_attributes(where(Artikelnummer: article_number)[1]).to_s)
+      end
+    end
+
     # --- Instance Methods --- #
 
      def readonly?  # prevents unintentional changes

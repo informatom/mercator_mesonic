@@ -32,7 +32,7 @@ namespace :webartikel do
     ::JobLogger.info("=" * 50)
   end
 
-    # starten als: 'bundle exec rake webartikel:remove_orphans'
+  # starten als: 'bundle exec rake webartikel:remove_orphans'
   # in Produktivumgebungen: 'bundle exec rake webartikel:remove_orphans RAILS_ENV=production'
   desc 'Remove ophaned inventories'
   task :remove_orphans => :environment do
@@ -44,6 +44,21 @@ namespace :webartikel do
     end
 
     ::JobLogger.info("Finished Job: webartikel:remove_orphans")
+    ::JobLogger.info("=" * 50)
+  end
+
+  # starten als: 'bundle exec rake webartikel:show_differences'
+  # in Produktivumgebungen: 'bundle exec rake webartikel:show_differences RAILS_ENV=production'
+  desc 'Show differences in instnaces with same article number'
+  task :show_differences => :environment do
+    ::JobLogger.info("=" * 50)
+    ::JobLogger.info("Started Job: webartikel:show_differences")
+
+    if MercatorMesonic::Webartikel.test_connection
+      MercatorMesonic::Webartikel.differences
+    end
+
+    ::JobLogger.info("Finished Job: webartikel:show_differences")
     ::JobLogger.info("=" * 50)
   end
 end
