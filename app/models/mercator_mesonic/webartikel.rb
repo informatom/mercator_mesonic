@@ -28,10 +28,12 @@ module MercatorMesonic
           index = index + 1
 
           @old_inventories = Inventory.where(number: artikelnummer)
-          if ( @old_inventories.destroy_all if @old_inventories )# This also deletes the prices!
-            ::JobLogger.info("Inventories deleted for Product " + artikelnummer)
-          else
-            ::JobLogger.error("Deleting Inventory failed: " + @old_inventories.errors.first)
+          if @old_inventories
+            if @old_inventories.destroy_all # This also deletes the prices!
+              ::JobLogger.info("Inventories deleted for Product " + artikelnummer)
+            else
+              ::JobLogger.error("Deleting Inventory failed: " + @old_inventories.errors.first)
+            end
           end
 
           artikel.each do |webartikel|
@@ -42,12 +44,11 @@ module MercatorMesonic
               @product.categorizations.where(category_id: @novelties.id).destroy_all
               @product.categorizations.where(category_id: @discounts.id).destroy_all
               @product.categorizations.where(category_id: @topsellers.id).destroy_all
-              if @product.lifecycle.can_reactivate?(User.where(administrator: true).first)
-                if @product.lifecycle.reactivate!(User.where(administrator: true).first)
-                  ::JobLogger.info("Product " + @product.number + " reactivated.")
-                else
-                  ::JobLogger.error("Product " + @product.number + " could not be reactivated!")
-                end
+              if @product.lifecycle.can_reactivate?(User.where(administrator: true).first)  &&
+                 @product.lifecycle.reactivate!(User.where(administrator: true).first)
+                ::JobLogger.info("Product " + @product.number + " reactivated.")
+              else
+                ::JobLogger.error("Product " + @product.number + " could not be reactivated!")
               end
             else
               @product = Product.create_in_auto(number: webartikel.Artikelnummer,
@@ -75,21 +76,19 @@ module MercatorMesonic
                                        just_imported: true,
                                        alternative_number: webartikel.AltArtNr1)
 
-            if ( webartikel.Kennzeichen == "T" ) &&
-               ( webartikel.Artikelnummer != Constant.find_by_key("shipping_cost_article").value )
+            if webartikel.Kennzeichen == "T" &&
+               webartikel.Artikelnummer != Constant.find_by_key("shipping_cost_article").value
               @product.topseller = true
-              position = 1
-              position = @topsellers.categorizations.maximum(:position) + 1 if @topsellers.categorizations.any?
+              position = @topsellers.categorizations.any? ? @topsellers.categorizations.maximum(:position) + 1 : 1
               @product.categorizations.new(category_id: @topsellers.id, position: position)
             else
               @product.categorizations.where(category_id: @topsellers.id).destroy_all
             end
 
-            if ( webartikel.Kennzeichen == "N" ) &&
-               ( webartikel.Artikelnummer != Constant.find_by_key("shipping_cost_article").value )
+            if webartikel.Kennzeichen == "N" &&
+               webartikel.Artikelnummer != Constant.find_by_key("shipping_cost_article").value
               @product.novelty = true
-              position = 1
-              position = @novelties.categorizations.maximum(:position) + 1 if @novelties.categorizations.any?
+              position = @novelties.categorizations.any? ? @novelties.categorizations.maximum(:position) + 1 : 1
               @product.categorizations.new(category_id: @novelties.id, position: position)
             else
               @product.categorizations.where(category_id: @novelties.id).destroy_all
@@ -97,8 +96,7 @@ module MercatorMesonic
 
             if webartikel.PreisdatumVON && ( webartikel.PreisdatumVON <= Time.now ) &&
                webartikel.PreisdatumBIS && ( webartikel.PreisdatumBIS >= Time.now )
-              position = 1
-              position = @discounts.categorizations.maximum(:position) + 1 if @discounts.categorizations.any?
+              position = @discounts.categorizations.any? ? @discounts.categorizations.maximum(:position) + 1 : 1
               @product.categorizations.new(category_id: @discounts.id, position: position)
             else
               @product.categorizations.where(category_id: @discounts.id).destroy_all
@@ -117,14 +115,13 @@ module MercatorMesonic
                                 vat: webartikel.Steuersatzzeile * 10,
                                 inventory_id: @inventory.id)
 
-            if webartikel.PreisdatumVON && ( webartikel.PreisdatumVON <= Time.now ) &&
-               webartikel.PreisdatumBIS && ( webartikel.PreisdatumBIS >= Time.now )
-              @price.promotion = true
-              @price.valid_from = webartikel.PreisdatumVON
-              @price.valid_to = webartikel.PreisdatumBIS
+            if webartikel.PreisdatumVON &&
+               webartikel.PreisdatumVON <= Time.now &&
+               webartikel.PreisdatumBIS &&
+               webartikel.PreisdatumBIS >= Time.now
+              @price.attributes = { promotion: true, valid_from: webartikel.PreisdatumVON, valid_to: webartikel.PreisdatumBIS}
             else
-              @price.valid_from = Date.today
-              @price.valid_to = Date.today + 1.year
+              @price.attributes = { valid_from: Date.today, valid_to: Date.today + 1.year }
             end
 
             if @price.save
@@ -136,8 +133,10 @@ module MercatorMesonic
             # ---  recommendations-Handling --- #
             if webartikel.Notiz1.present? && webartikel.Notiz2.present?
               @recommended_product = Product.where(number: webartikel.Notiz1).first
-              @product.recommendations.new(recommended_product: @recommended_product,
-                                           reason_de: webartikel.Notiz2) if @recommended_product
+              if @recommended_product
+                @product.recommendations.new(recommended_product: @recommended_product,
+                                             reason_de: webartikel.Notiz2)
+              end
             end
 
             if @product.save
@@ -199,6 +198,18 @@ module MercatorMesonic
       end
 
       return false
+    end
+
+    def self.non_unique
+      group(:Artikelnummer).count.select{ |key,value| value > 1 }.keys
+    end
+
+    def duplicates
+      article_numbers = []
+      non_unique.each do |article_number|
+        if where(:Artikelnummer: article_number)[0].to_a - where(:Artikelnummer: article_number)[1].to_a == []
+          article_numbers << article_number
+      end
     end
 
     # --- Instance Methods --- #
