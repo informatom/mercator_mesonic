@@ -207,7 +207,7 @@ module MercatorMesonic
     def duplicates
       article_numbers = []
       non_unique.each do |article_number|
-        if where(Artikelnummer: article_number)[0].to_a - where(Artikelnummer: article_number)[1].to_a == []
+        if where(Artikelnummer: article_number)[0].attributes.to_a - where(Artikelnummer: article_number)[1].attributes.to_a == []
           article_numbers << article_number
         end
       end
