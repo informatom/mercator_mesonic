@@ -172,8 +172,6 @@ module MercatorMesonic
           else
             ::JobLogger.info("Deleting Inventory failed: " + inventory.errors.first)
           end
-        else
-          ::JobLogger.info("Inventory " + inventory.number.to_s + " still present in MercatorMesonic::Webartikel.")
         end
       end
       ::JobLogger.info("Resetting new inventories ...")
