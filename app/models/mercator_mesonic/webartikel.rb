@@ -14,6 +14,8 @@ module MercatorMesonic
       @novelties  = Category.novelties
       @discounts  = Category.discounts
 
+      @jobuser = User.find_by(surname: "Job User")
+
       if update == "changed"
         @last_batch = Inventory.maximum(:erp_updated_at)
         @webartikel = Webartikel.where("letzteAend > ?", @last_batch)
@@ -29,9 +31,7 @@ module MercatorMesonic
 
           @old_inventories = Inventory.where(number: artikelnummer)
           if @old_inventories
-            if @old_inventories.destroy_all # This also deletes the prices!
-              ::JobLogger.info("Inventories deleted for Product " + artikelnummer)
-            else
+            unless @old_inventories.destroy_all # This also deletes the prices!
               ::JobLogger.error("Deleting Inventory failed: " + @old_inventories.errors.first)
             end
           end
@@ -40,20 +40,23 @@ module MercatorMesonic
             @product = Product.where(number: webartikel.Artikelnummer).first
 
             if @product
-              @product.recommendations.destroy_all
+              unless @product.recommendations.destroy_all
+                ::JobLogger.error("Deleting Recommendations failed for Product " + @product.id.to_s)
+              end
               @product.categorizations.where(category_id: @novelties.id).destroy_all
               @product.categorizations.where(category_id: @discounts.id).destroy_all
               @product.categorizations.where(category_id: @topsellers.id).destroy_all
-              if @product.lifecycle.can_reactivate?(User.where(administrator: true).first)  &&
-                 @product.lifecycle.reactivate!(User.where(administrator: true).first)
-                ::JobLogger.info("Product " + @product.number + " reactivated.")
-              else
-                ::JobLogger.error("Product " + @product.number + " could not be reactivated!")
+              if @product.lifecycle.can_reactivate?(@jobuser)  &&
+                unless @product.lifecycle.reactivate!(@jobuser)
+                  ::JobLogger.error("Product " + @product.id.to_s + " could not be reactivated!")
+                end
               end
             else
-              @product = Product.create_in_auto(number: webartikel.Artikelnummer,
-                                                title: webartikel.Bezeichnung,
-                                                description: webartikel.comment)
+              unless @product = Product.create_in_auto(number: webartikel.Artikelnummer,
+                                                       title: webartikel.Bezeichnung,
+                                                       description: webartikel.comment)
+                ::JobLogger.error("Product " + @product.number + " could not be created!")
+              end
             end
 
             delivery_time =  webartikel.Zusatzfeld5 ? webartikel.Zusatzfeld5 : I18n.t("mercator.on_request")
@@ -82,7 +85,9 @@ module MercatorMesonic
               position = @topsellers.categorizations.any? ? @topsellers.categorizations.maximum(:position) + 1 : 1
               @product.categorizations.new(category_id: @topsellers.id, position: position)
             else
-              @product.categorizations.where(category_id: @topsellers.id).destroy_all
+              unless @product.categorizations.where(category_id: @topsellers.id).destroy_all
+                ::JobLogger.error("Product " + @product.id.to_s + " could not be romoved from topsellers!")
+              end
             end
 
             if webartikel.Kennzeichen == "N" &&
@@ -91,7 +96,9 @@ module MercatorMesonic
               position = @novelties.categorizations.any? ? @novelties.categorizations.maximum(:position) + 1 : 1
               @product.categorizations.new(category_id: @novelties.id, position: position)
             else
-              @product.categorizations.where(category_id: @novelties.id).destroy_all
+              unless @product.categorizations.where(category_id: @novelties.id).destroy_all
+                ::JobLogger.error("Product " + @product.id.to_s + " could not be romoved from novelties!")
+              end
             end
 
             if webartikel.PreisdatumVON && ( webartikel.PreisdatumVON <= Time.now ) &&
@@ -99,12 +106,12 @@ module MercatorMesonic
               position = @discounts.categorizations.any? ? @discounts.categorizations.maximum(:position) + 1 : 1
               @product.categorizations.new(category_id: @discounts.id, position: position)
             else
-              @product.categorizations.where(category_id: @discounts.id).destroy_all
+              unless @product.categorizations.where(category_id: @discounts.id).destroy_all
+                ::JobLogger.error("Product " + @product.id.to_s + " could not be romoved from discounts!")
+              end
             end
 
-            if @inventory.save
-              ::JobLogger.info("Inventory " + @inventory.number + " saved.")
-            else
+            unless @inventory.save
               ::JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s)
             end
 
@@ -115,18 +122,14 @@ module MercatorMesonic
                                 vat: webartikel.Steuersatzzeile * 10,
                                 inventory_id: @inventory.id)
 
-            if webartikel.PreisdatumVON &&
-               webartikel.PreisdatumVON <= Time.now &&
-               webartikel.PreisdatumBIS &&
-               webartikel.PreisdatumBIS >= Time.now
+            if webartikel.PreisdatumVON && webartikel.PreisdatumVON <= Time.now &&
+               webartikel.PreisdatumBIS && webartikel.PreisdatumBIS >= Time.now
               @price.attributes = { promotion: true, valid_from: webartikel.PreisdatumVON, valid_to: webartikel.PreisdatumBIS}
             else
               @price.attributes = { valid_from: Date.today, valid_to: Date.today + 1.year }
             end
 
-            if @price.save
-              ::JobLogger.info("Price for Inventory " + @price.inventory_id.to_s + " saved.")
-            else
+            unless @price.save
               ::JobLogger.error("Saving Price failed: " +  @price.errors.first.to_s)
             end
 
@@ -139,10 +142,8 @@ module MercatorMesonic
               end
             end
 
-            if @product.save
-              ::JobLogger.info("Recommendation for Product " + @product.number + " saved.")
-            else
-              ::JobLogger.error("Saving Recommendation failed: " +  @product.errors.first.to_s)
+            unless @product.save
+              ::JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s)
             end
           end
           ::JobLogger.info("----- Finished: " + artikelnummer.to_s + " (" +  index.to_s + "/" + amount.to_s + ") -----")
@@ -151,15 +152,18 @@ module MercatorMesonic
         ::JobLogger.info("No new entries in WEBARTIKEL View, nothing updated.")
       end
 
+      ::JobLogger.info("Removing orphans ... ")
       self.remove_orphans(only_old: true)
 
       ::JobLogger.info("Deprecating products ... ")
       ::Product.deprecate
+
+      ::JobLogger.info("Reindexing Categories ... ")
+      ::Category.reindexing_and_filter_updates
     end
 
 
     def self.remove_orphans(only_old: false)
-      ::JobLogger.info("Removing orphans ...")
       if only_old
         @inventories = Inventory.where(just_imported: [false, nil])
       else
@@ -167,18 +171,18 @@ module MercatorMesonic
       end
       @inventories.each do |inventory|
         if MercatorMesonic::Webartikel.where(Artikelnummer: inventory.number).count == 0
-          if inventory.destroy
-            ::JobLogger.info("Deleted Inventory " + inventory.number.to_s)
-          else
+          unless inventory.destroy
             ::JobLogger.info("Deleting Inventory failed: " + inventory.errors.first)
           end
         end
       end
-      ::JobLogger.info("Resetting new inventories ...")
+
       Inventory.where(just_imported: true).each do |inventory|
-        inventory.update_attributes(just_imported: false)
+        unless inventory.update_attributes(just_imported: false)
+          ::JobLogger.info("Resetting new inventory" + inventory.id.to_s + "failed!")
+        end
       end
-      ::JobLogger.info("... completed, removing orphans finished.")
+      ::JobLogger.info("... Removing finished.")
     end
 
 
