@@ -185,13 +185,16 @@ module MercatorMesonic
       ::JobLogger.info("... Removing finished.")
     end
 
-
+# Usage for console: MercatorMesonic::Webartikel.test_connection
     def self.test_connection
-      [1,2,3].each do |attempt|
+      start_time = Time.now
+      puts "Stop watch started ..."
+      [1,2,3,4,5].each do |attempt|
         begin
-          self.count # that actually tries to establish a connection
+          self.first # that actually tries to establish a connection
+          delta = Time.now - start_time
+          puts "Connection established within " + delta.to_s + " seconds"
           ::JobLogger.info("Connection to Mesonic database established successfully.")
-          puts "further logging goes to Joblog: /log/RAILS_ENV_job.log ..."
           return true
         rescue
           ::JobLogger.fatal("Connection to Mesonic database could not be established! (attempt no." + attempt.to_s + ")")

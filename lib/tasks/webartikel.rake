@@ -49,7 +49,7 @@ namespace :webartikel do
 
   # starten als: 'bundle exec rake webartikel:show_differences'
   # in Produktivumgebungen: 'bundle exec rake webartikel:show_differences RAILS_ENV=production'
-  desc 'Show differences in instnaces with same article number'
+  desc 'Show differences in instances with same article number'
   task :show_differences => :environment do
     ::JobLogger.info("=" * 50)
     ::JobLogger.info("Started Job: webartikel:show_differences")
@@ -60,5 +60,12 @@ namespace :webartikel do
 
     ::JobLogger.info("Finished Job: webartikel:show_differences")
     ::JobLogger.info("=" * 50)
+  end
+
+  # starten als: 'bundle exec rake webartikel:test_connection'
+  # in Produktivumgebungen: 'bundle exec rake webartikel:test_connection RAILS_ENV=production'
+  desc 'Show differences in instances with same article number'
+  task :test_connection => :environment do
+    MercatorMesonic::Webartikel.test_connection
   end
 end
