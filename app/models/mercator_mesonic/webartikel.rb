@@ -191,7 +191,7 @@ module MercatorMesonic
       puts "Stop watch started ..."
       [1,2,3,4,5].each do |attempt|
         begin
-          self.first # that actually tries to establish a connection
+          self.count # that actually tries to establish a connection
           delta = Time.now - start_time
           puts "Connection established within " + delta.to_s + " seconds"
           ::JobLogger.info("Connection to Mesonic database established successfully.")
