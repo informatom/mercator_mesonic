@@ -127,7 +127,6 @@ module MercatorMesonic
             end
 
             @product.save or ::JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s)
-            end
           end
           ::JobLogger.info("----- Finished: " + artikelnummer.to_s + " (" +  index.to_s + "/" + amount.to_s + ") -----")
         end
