@@ -42,13 +42,13 @@ module MercatorMesonic
               @product.categorizations.where(category_id: @discounts.id).destroy_all
               @product.categorizations.where(category_id: @topsellers.id).destroy_all
 
-              (@product.lifecycle.can_reactivate?(@jobuser) && @product.lifecycle.reactivate!(@jobuser))
-                or ::JobLogger.error("Product " + @product.id.to_s + " could not be reactivated!")
+              (@product.lifecycle.can_reactivate?(@jobuser) && @product.lifecycle.reactivate!(@jobuser)) or
+                ::JobLogger.error("Product " + @product.id.to_s + " could not be reactivated!")
             else
               @product = Product.create_in_auto(number: webartikel.Artikelnummer,
                                                 title: webartikel.Bezeichnung,
-                                                description: webartikel.comment)
-                or ::JobLogger.error("Product " + @product.number + " could not be created!")
+                                                description: webartikel.comment) or
+                ::JobLogger.error("Product " + @product.number + " could not be created!")
               end
             end
 
