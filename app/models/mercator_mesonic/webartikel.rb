@@ -49,7 +49,6 @@ module MercatorMesonic
                                                 title: webartikel.Bezeichnung,
                                                 description: webartikel.comment) or
                 ::JobLogger.error("Product " + @product.number + " could not be created!")
-              end
             end
 
             delivery_time =  webartikel.Zusatzfeld5 ? webartikel.Zusatzfeld5 : I18n.t("mercator.on_request")
