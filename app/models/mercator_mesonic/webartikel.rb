@@ -204,6 +204,10 @@ module MercatorMesonic
       end
     end
 
+    def self.count_aktionen
+      self.where{|w| ( w.PreisdatumVON <= Time.now) & (w.PreisdatumBIS >= Time.now)}.count
+    end
+
     # --- Instance Methods --- #
 
      def readonly?  # prevents unintentional changes
