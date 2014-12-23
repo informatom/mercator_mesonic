@@ -10,10 +10,6 @@ module MercatorMesonic
     # --- Class Methods --- #
 
     def self.import(update: "changed")
-      @topsellers = Category.topseller
-      @novelties  = Category.novelties
-      @discounts  = Category.discounts
-
       @jobuser = User.find_by(surname: "Job User")
 
       if update == "changed"
@@ -38,17 +34,15 @@ module MercatorMesonic
             if @product
               @product.recommendations.destroy_all
 
-              @product.categorizations.where(category_id: @novelties.id).destroy_all
-              @product.categorizations.where(category_id: @discounts.id).destroy_all
-              @product.categorizations.where(category_id: @topsellers.id).destroy_all
-
-              (@product.lifecycle.can_reactivate?(@jobuser) && @product.lifecycle.reactivate!(@jobuser)) or
-                ::JobLogger.error("Product " + @product.id.to_s + " could not be reactivated!")
+              if @product.state == "deactivated"
+                @product.lifecycle.reactivate!(@jobuser) or
+                (( JobLogger.error("Product " + @product.id.to_s + " could not be reactivated!") ))
+              end
             else
               @product = Product.create_in_auto(number: webartikel.Artikelnummer,
                                                 title: webartikel.Bezeichnung,
                                                 description: webartikel.comment) or
-                ::JobLogger.error("Product " + @product.number + " could not be created!")
+              (( JobLogger.error("Product " + @product.number + " could not be created!") ))
             end
 
             delivery_time =  webartikel.Zusatzfeld5 ? webartikel.Zusatzfeld5 : I18n.t("mercator.on_request")
@@ -71,35 +65,13 @@ module MercatorMesonic
                                        just_imported: true,
                                        alternative_number: webartikel.AltArtNr1)
 
-            if webartikel.Kennzeichen == "T" &&
-               webartikel.Artikelnummer != Constant.find_by_key("shipping_cost_article").value
-              @product.topseller = true
-              position = @topsellers.categorizations.any? ? @topsellers.categorizations.maximum(:position) + 1 : 1
-              @product.categorizations.new(category_id: @topsellers.id, position: position)
-            else
-              @product.topseller = false
-              @product.categorizations.where(category_id: @topsellers.id).destroy_all
-            end
+            webartikel.update_topseller(product: @product)
+            webartikel.update_novelty(product: @product)
+            webartikel.update_discount(product: @product)
+            webartikel.create_categorization(product: @product)
 
-            if webartikel.Kennzeichen == "N" &&
-               webartikel.Artikelnummer != Constant.find_by_key("shipping_cost_article").value
-              @product.novelty = true
-              position = @novelties.categorizations.any? ? @novelties.categorizations.maximum(:position) + 1 : 1
-              @product.categorizations.new(category_id: @novelties.id, position: position)
-            else
-              @product.novelty = false
-              @product.categorizations.where(category_id: @novelties.id).destroy_all
-            end
-
-            if webartikel.PreisdatumVON && ( webartikel.PreisdatumVON <= Time.now ) &&
-               webartikel.PreisdatumBIS && ( webartikel.PreisdatumBIS >= Time.now )
-              position = @discounts.categorizations.any? ? @discounts.categorizations.maximum(:position) + 1 : 1
-              @product.categorizations.new(category_id: @discounts.id, position: position)
-            else
-              @product.categorizations.where(category_id: @discounts.id).destroy_all
-            end
-
-            @inventory.save or ::JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s)
+            @inventory.save or
+            (( JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s) ))
 
             # ---  Price-Handling --- #
             @price =  Price.new(value: webartikel.Preis,
@@ -115,7 +87,8 @@ module MercatorMesonic
               @price.attributes = { valid_from: Date.today, valid_to: Date.today + 1.year }
             end
 
-            @price.save or ::JobLogger.error("Saving Price failed: " +  @price.errors.first.to_s)
+            @price.save or
+            (( JobLogger.error("Saving Price failed: " +  @price.errors.first.to_s) ))
 
             # ---  recommendations-Handling --- #
             if webartikel.Notiz1.present? && webartikel.Notiz2.present?
@@ -126,22 +99,17 @@ module MercatorMesonic
               end
             end
 
-            @product.save or ::JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s)
+            @product.save or
+            (( JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s)) and debugger)
           end
-          ::JobLogger.info("----- Finished: " + artikelnummer.to_s + " (" +  index.to_s + "/" + amount.to_s + ") -----")
         end
       else
-        ::JobLogger.info("No new entries in WEBARTIKEL View, nothing updated.")
+        puts "No new entries in WEBARTIKEL View, nothing updated."
       end
 
-      ::JobLogger.info("Removing orphans ... ")
       self.remove_orphans(only_old: true)
-
-      ::JobLogger.info("Deprecating products ... ")
-      ::Product.deprecate
-
-      ::JobLogger.info("Reindexing Categories ... ")
-      ::Category.reindexing_and_filter_updates
+      Product.deprecate
+      Category.reindexing_and_filter_updates
     end
 
 
@@ -152,15 +120,16 @@ module MercatorMesonic
         @inventories = Inventory.all
       end
       @inventories.each do |inventory|
-        if MercatorMesonic::Webartikel.where(Artikelnummer: inventory.number).count == 0
-          inventory.destroy or ::JobLogger.info("Deleting Inventory failed: " + inventory.errors.first)
+        if Webartikel.where(Artikelnummer: inventory.number).count == 0
+          inventory.destroy or
+          (( JobLogger.error("Deleting Inventory failed: " + inventory.errors.first) ))
         end
       end
 
       Inventory.where(just_imported: true).each do |inventory|
-        inventory.update_attributes(just_imported: false) or ::JobLogger.info("Resetting new inventory" + inventory.id.to_s + "failed!")
+        inventory.update_attributes(just_imported: false) or
+        (( JobLogger.error("Resetting new inventory" + inventory.id.to_s + "failed!") ))
       end
-      ::JobLogger.info("... Removing finished.")
     end
 
 # Usage for console: MercatorMesonic::Webartikel.test_connection
@@ -172,11 +141,11 @@ module MercatorMesonic
           self.count # that actually tries to establish a connection
           delta = Time.now - start_time
           puts "Connection established within " + delta.to_s + " seconds"
-          ::JobLogger.info("Connection to Mesonic database established successfully.")
+          JobLogger.info("Connection to Mesonic database established successfully.")
           return true
         rescue
-          ::JobLogger.fatal("Connection to Mesonic database could not be established! (attempt no." + attempt.to_s + ")")
-          puts "FATAL ERROR: Connection to Mesonic database could not be established! (attempt no." + attempt.to_s + ")"
+          JobLogger.fatal("Mesonic database connection error (#" + attempt.to_s + ")")
+          puts "FATAL ERROR: Mesonic database connection error (#" + attempt.to_s + ")"
         end
       end
 
@@ -199,8 +168,8 @@ module MercatorMesonic
 
     def self.differences
       non_unique.each do |article_number|
-        ::JobLogger.info(article_number + ": " +
-                         where(Artikelnummer: article_number)[0].different_attributes(where(Artikelnummer: article_number)[1]).to_s)
+        JobLogger.info(article_number + ": " +
+                       where(Artikelnummer: article_number)[0].different_attributes(where(Artikelnummer: article_number)[1]).to_s)
       end
     end
 
@@ -208,17 +177,73 @@ module MercatorMesonic
       self.where{|w| ( w.PreisdatumVON <= Time.now) & (w.PreisdatumBIS >= Time.now)}.count
     end
 
+    def self.update_categorizations
+      Categorization.all.delete_all
+      Webartikel.all.each do |webartikel|
+        product = Product.find_by(number: webartikel.Artikelnummer) or
+        (( JobLogger.error("Product not found " + webartikel.Artikelnummer) ))
+
+        webartikel.update_topseller(product: product)
+        webartikel.update_novelty(product: product)
+        webartikel.update_discount(product: product)
+        webartikel.create_categorization(product: product)
+      end
+    end
+
     # --- Instance Methods --- #
 
-     def readonly?  # prevents unintentional changes
+    def readonly?  # prevents unintentional changes
       true
-     end
+    end
 
     def comment
       if self.Langtext1.present?
         return self.Langtext1.to_s + " " + self.Langtext2.to_s
       else
         return self.Langtext2.to_s
+      end
+    end
+
+    def update_topseller(product: nil)
+      topsellers = Category.topseller
+      product.categorizations.where(category_id: topsellers.id).destroy_all
+      if self.Kennzeichen == "T" && self.Artikelnummer != Constant.find_by(key: "shipping_cost_article").value
+        product.topseller = true
+        position =  topsellers.categorizations.any? ? topsellers.categorizations.maximum(:position) + 1 : 1
+        product.categorizations.new(category_id: topsellers.id, position: position)
+      else
+        product.topseller = false
+      end
+    end
+
+    def update_novelty(product: nil)
+      novelties = Category.novelties
+      product.categorizations.where(category_id: novelties.id).destroy_all
+      if self.Kennzeichen == "N" && self.Artikelnummer != Constant.find_by(key: "shipping_cost_article").value
+        product.novelty = true
+        position = novelties.categorizations.any? ? novelties.categorizations.maximum(:position) + 1 : 1
+        product.categorizations.new(category_id: novelties.id, position: position)
+      else
+        product.novelty = false
+      end
+    end
+
+    def update_discount(product: nil)
+      discounts  = Category.discounts
+      product.categorizations.where(category_id: discounts.id).destroy_all
+      if self.PreisdatumVON && ( self.PreisdatumVON <= Time.now ) &&
+         self.PreisdatumBIS && ( self.PreisdatumBIS >= Time.now )
+        position = discounts.categorizations.any? ? discounts.categorizations.maximum(:position) + 1 : 1
+        product.categorizations.new(category_id: discounts.id, position: position)
+      end
+    end
+
+    def create_categorization(product:nil)
+      category = Category.find_by(erp_identifier: self.Artikeluntergruppe) or
+      (( JobLogger.error("Product " + product.number + " misses category " + self.Artikeluntergruppe.to_s ) and return ))
+      position = category.categorizations.any? ? category.categorizations.maximum(:position) + 1 : 1
+      unless product.categorizations.where(category_id: category.id).any?
+        product.categorizations.new(category_id: category.id, position: position)
       end
     end
   end
