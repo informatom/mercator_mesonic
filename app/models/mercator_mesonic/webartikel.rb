@@ -239,8 +239,10 @@ module MercatorMesonic
     end
 
     def create_categorization(product:nil)
-      category = Category.find_by(erp_identifier: self.Artikeluntergruppe) or
-      (( JobLogger.error("Product " + product.number + " misses category " + self.Artikeluntergruppe.to_s ) and return ))
+      unless category = Category.find_by(erp_identifier: self.Artikeluntergruppe)
+        JobLogger.info("Product " + product.number + " misses category " + self.Artikeluntergruppe.to_s ) and return ))
+        category = Category.auto
+      end
       position = category.categorizations.any? ? category.categorizations.maximum(:position) + 1 : 1
       unless product.categorizations.where(category_id: category.id).any?
         product.categorizations.new(category_id: category.id, position: position)
