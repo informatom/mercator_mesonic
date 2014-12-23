@@ -19,7 +19,7 @@ module MercatorMesonic
         @webartikel = Webartikel.all
         productnumbers = Product.pluck("number")
         @webartikel = @webartikel.find_all{ |webartikel| !productnumbers.include?(webartikel.Artikelnummer) }
-        JobLogger.info(@webartikel.count + " Products missing ...")
+        JobLogger.info(@webartikel.count.to_s + " Products missing ...")
       else
         @webartikel = Webartikel.all
       end
