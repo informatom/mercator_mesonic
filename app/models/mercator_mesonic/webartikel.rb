@@ -15,6 +15,11 @@ module MercatorMesonic
       if update == "changed"
         @last_batch = [Inventory.maximum(:erp_updated_at), Time.now - 1.day].min
         @webartikel = Webartikel.where("letzteAend > ?", @last_batch)
+      elsif update == "missing"
+        @webartikel = Webartikel.all
+        productnumbers = Product.pluck("number")
+        @webartikel = @webartikel.find_all{ |webartikel| !productnumbers.include?(webartikel.Artikelnummer) }
+        JobLogger.info(@webartikel.count + " Products missing ...")
       else
         @webartikel = Webartikel.all
       end
@@ -42,7 +47,7 @@ module MercatorMesonic
               @product = Product.create_in_auto(number: webartikel.Artikelnummer,
                                                 title: webartikel.Bezeichnung,
                                                 description: webartikel.comment) or
-              (( JobLogger.error("Product " + @product.number + " could not be created!") ))
+              (( JobLogger.error("Product " + @product.number + " could not be created!") and debugger ))
             end
 
             delivery_time =  webartikel.Zusatzfeld5 ? webartikel.Zusatzfeld5 : I18n.t("mercator.on_request")
@@ -187,6 +192,8 @@ module MercatorMesonic
         webartikel.update_novelty(product: product)
         webartikel.update_discount(product: product)
         webartikel.create_categorization(product: product)
+        product.save or
+        (( JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s)) and debugger)
       end
     end
 
