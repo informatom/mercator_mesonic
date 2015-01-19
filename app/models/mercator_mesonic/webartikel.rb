@@ -246,13 +246,27 @@ module MercatorMesonic
     end
 
     def create_categorization(product:nil)
-      unless category = Category.find_by(erp_identifier: self.Artikeluntergruppe)
-        JobLogger.info("Product " + product.number + " misses category " + self.Artikeluntergruppe.to_s )
-        category = Category.auto
+      categories = []
+      category = Category.find_by(erp_identifier: self.Artikeluntergruppe)
+      categories << category if category
+
+      Category.where.not(squeel_condition: [nil, '']).each do |category|
+        if MercatorMesonic::Webartikel.where{instance_eval(category.squeel_condition)}.include?(self)
+          categories << category
+          JobLogger.info("Product " + product.number + " categorized by squeel into " + category.name_de.to_s )
+        end
       end
-      position = category.categorizations.any? ? category.categorizations.maximum(:position) + 1 : 1
-      unless product.categorizations.where(category_id: category.id).any?
-        product.categorizations.new(category_id: category.id, position: position)
+
+      unless categories.any?
+        JobLogger.info("Product " + product.number + " misses category " + self.Artikeluntergruppe.to_s )
+        categories << Category.auto
+      end
+
+      categories.each do |category|
+        position = category.categorizations.any? ? category.categorizations.maximum(:position) + 1 : 1
+        unless product.categorizations.where(category_id: category.id).any?
+          product.categorizations.new(category_id: category.id, position: position)
+        end
       end
     end
   end
