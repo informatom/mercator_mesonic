@@ -72,7 +72,6 @@ module MercatorMesonic
 
             webartikel.update_topseller(product: @product)
             webartikel.update_novelty(product: @product)
-            webartikel.update_discount(product: @product)
             webartikel.create_categorization(product: @product)
 
             @inventory.save or
@@ -190,7 +189,6 @@ module MercatorMesonic
 
         webartikel.update_topseller(product: product)
         webartikel.update_novelty(product: product)
-        webartikel.update_discount(product: product)
         webartikel.create_categorization(product: product)
         product.save or
         (( JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s)) and debugger)
@@ -232,16 +230,6 @@ module MercatorMesonic
         product.categorizations.new(category_id: novelties.id, position: position)
       else
         product.novelty = false
-      end
-    end
-
-    def update_discount(product: nil)
-      discounts  = Category.discounts
-      product.categorizations.where(category_id: discounts.id).destroy_all
-      if self.PreisdatumVON && ( self.PreisdatumVON <= Time.now ) &&
-         self.PreisdatumBIS && ( self.PreisdatumBIS >= Time.now )
-        position = discounts.categorizations.any? ? discounts.categorizations.maximum(:position) + 1 : 1
-        product.categorizations.new(category_id: discounts.id, position: position)
       end
     end
 
