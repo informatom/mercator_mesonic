@@ -70,8 +70,6 @@ module MercatorMesonic
                                        just_imported: true,
                                        alternative_number: webartikel.AltArtNr1)
 
-            webartikel.update_topseller(product: @product)
-            webartikel.update_novelty(product: @product)
             webartikel.create_categorization(product: @product)
 
             @inventory.save or
@@ -187,8 +185,6 @@ module MercatorMesonic
         product = Product.find_by(number: webartikel.Artikelnummer) or
         (( JobLogger.error("Product not found " + webartikel.Artikelnummer) ))
 
-        webartikel.update_topseller(product: product)
-        webartikel.update_novelty(product: product)
         webartikel.create_categorization(product: product)
         product.save or
         (( JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s)) and debugger)
@@ -206,30 +202,6 @@ module MercatorMesonic
         return self.Langtext1.to_s + " " + self.Langtext2.to_s
       else
         return self.Langtext2.to_s
-      end
-    end
-
-    def update_topseller(product: nil)
-      topsellers = Category.topseller
-      product.categorizations.where(category_id: topsellers.id).destroy_all
-      if self.Kennzeichen == "T" && self.Artikelnummer != Constant.find_by(key: "shipping_cost_article").value
-        product.topseller = true
-        position =  topsellers.categorizations.any? ? topsellers.categorizations.maximum(:position) + 1 : 1
-        product.categorizations.new(category_id: topsellers.id, position: position)
-      else
-        product.topseller = false
-      end
-    end
-
-    def update_novelty(product: nil)
-      novelties = Category.novelties
-      product.categorizations.where(category_id: novelties.id).destroy_all
-      if self.Kennzeichen == "N" && self.Artikelnummer != Constant.find_by(key: "shipping_cost_article").value
-        product.novelty = true
-        position = novelties.categorizations.any? ? novelties.categorizations.maximum(:position) + 1 : 1
-        product.categorizations.new(category_id: novelties.id, position: position)
-      else
-        product.novelty = false
       end
     end
 
