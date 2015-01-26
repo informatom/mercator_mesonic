@@ -8,7 +8,6 @@ module MercatorMesonic
              :foreign_key => "c000", :primary_key => "Artikelnummer"
 
     # --- Class Methods --- #
-
     def self.import(update: "changed")
       @jobuser = User.find_by(surname: "Job User")
 
@@ -47,7 +46,7 @@ module MercatorMesonic
               @product = Product.create_in_auto(number: webartikel.Artikelnummer,
                                                 title: webartikel.Bezeichnung,
                                                 description: webartikel.comment) or
-              (( JobLogger.error("Product " + @product.number + " could not be created!") and debugger ))
+              (( JobLogger.error("Product " + @product.number + " could not be created!") ))
             end
 
             delivery_time =  webartikel.Zusatzfeld5 ? webartikel.Zusatzfeld5 : I18n.t("mercator.on_request")
@@ -102,7 +101,7 @@ module MercatorMesonic
             end
 
             @product.save or
-            (( JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s)) and debugger)
+            (( JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s)) )
           end
         end
       else
@@ -187,7 +186,7 @@ module MercatorMesonic
 
         webartikel.create_categorization(product: product)
         product.save or
-        (( JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s)) and debugger)
+        (( JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s) ))
       end
     end
 
