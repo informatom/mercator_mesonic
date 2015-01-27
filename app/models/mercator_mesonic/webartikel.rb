@@ -105,7 +105,7 @@ module MercatorMesonic
             end
 
             @product.save or
-            (( JobLogger.error("Saving Product " + @product.id + " " + @product.number +
+            (( JobLogger.error("Saving Product " + @product.id.to_s + " " + @product.number +
                                " failed: " +  @product.errors.first.to_s)) )
           end
         end
