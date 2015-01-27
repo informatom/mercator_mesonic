@@ -10,16 +10,20 @@ module MercatorMesonic
     # --- Class Methods --- #
     def self.import(update: "changed")
       @jobuser = User.find_by(surname: "Job User")
+      JobLogger.info("=" * 50)
 
       if update == "changed"
+        JobLogger.info("Started Job: webartikel:update")
         @last_batch = [Inventory.maximum(:erp_updated_at), Time.now - 1.day].min
         @webartikel = Webartikel.where("letzteAend > ?", @last_batch)
       elsif update == "missing"
+        ::JobLogger.info("Started Job: webartikel:missing")
         @webartikel = Webartikel.all
         productnumbers = Product.pluck("number")
         @webartikel = @webartikel.find_all{ |webartikel| !productnumbers.include?(webartikel.Artikelnummer) }
         JobLogger.info(@webartikel.count.to_s + " Products missing ...")
       else
+        ::JobLogger.info("Started Job: webartikel:import")
         @webartikel = Webartikel.all
       end
 
@@ -101,7 +105,7 @@ module MercatorMesonic
             end
 
             @product.save or
-            (( JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s)) )
+            (( JobLogger.error("Saving Product " + @product.number + " failed: " +  @product.errors.first.to_s)) )
           end
         end
       else
@@ -111,10 +115,16 @@ module MercatorMesonic
       self.remove_orphans(only_old: true)
       Product.deprecate
       Category.reindexing_and_filter_updates
+
+      JobLogger.info("Finished Job: webartikel:import")
+      JobLogger.info("=" * 50)
     end
 
 
     def self.remove_orphans(only_old: false)
+      JobLogger.info("=" * 50)
+      JobLogger.info("Started Job: webartikel:remove_orphans")
+
       if only_old
         @inventories = Inventory.where(just_imported: [false, nil])
       else
@@ -131,9 +141,12 @@ module MercatorMesonic
         inventory.update_attributes(just_imported: false) or
         (( JobLogger.error("Resetting new inventory" + inventory.id.to_s + "failed!") ))
       end
+
+      JobLogger.info("Finished Job: webartikel:remove_orphans")
+      JobLogger.info("=" * 50)
     end
 
-# Usage for console: MercatorMesonic::Webartikel.test_connection
+    # Usage from rails console: MercatorMesonic::Webartikel.test_connection
     def self.test_connection
       start_time = Time.now
       puts "Stop watch started ..."
@@ -168,10 +181,16 @@ module MercatorMesonic
     end
 
     def self.differences
+      JobLogger.info("=" * 50)
+      JobLogger.info("Started Job: webartikel:show_differences")
+
       non_unique.each do |article_number|
         JobLogger.info(article_number + ": " +
                        where(Artikelnummer: article_number)[0].different_attributes(where(Artikelnummer: article_number)[1]).to_s)
       end
+
+      JobLogger.info("Finished Job: webartikel:show_differences")
+      JobLogger.info("=" * 50)
     end
 
     def self.count_aktionen
@@ -186,7 +205,7 @@ module MercatorMesonic
 
         webartikel.create_categorization(product: product)
         product.save or
-        (( JobLogger.error("Saving Product failed: " +  @product.errors.first.to_s) ))
+        (( JobLogger.error("Saving Product " + @product.number + " failed: " +  @product.errors.first.to_s) ))
       end
     end
 
