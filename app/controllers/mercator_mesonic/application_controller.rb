@@ -21,6 +21,5 @@ module MercatorMesonic
         Webartikel.import(update: "changed")
       end
     end
-
   end
 end

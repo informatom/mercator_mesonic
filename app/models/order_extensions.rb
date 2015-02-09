@@ -35,8 +35,8 @@ module OrderExtensions
 
     if save_return_value
       self.update(erp_customer_number: self.user.erp_account_nr,
-                  erp_billing_number: mesonic_order.c021,
-                  erp_order_number: mesonic_order.c022)
+                  erp_billing_number:  mesonic_order.c021,
+                  erp_order_number:    mesonic_order.c022)
       OrderMailer.order_confirmation(order: self)
     else
       raise "Error! Order could not be pushed to mesonic!"
