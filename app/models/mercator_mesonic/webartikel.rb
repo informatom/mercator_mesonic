@@ -210,6 +210,42 @@ module MercatorMesonic
       end
     end
 
+    # The Miranda way of categorizing...
+    def self.categorize_from_properties
+#      webartikel_numbers = MercatorMesonic::Eigenschaft.where(c003: 1, c002: 5).*.c000
+#      Product.where(number: webartikel_numbers).count
+#      well, should we double check??  ....
+
+      schnaeppchen_numbers = MercatorMesonic::Eigenschaft.where(c003: 1, c002: 11).*.c000
+      schnaeppchen_category = Category.find_by_name_de("Schnäppchen")
+
+      Product.where(number: schnaeppchen_numbers).each do |schnaeppchen|
+        unless schnaeppchen.categorizations.where(category_id: schnaeppchen_category.id).any?
+          position = schnaeppchen_category.categorizations.any? ? schnaeppchen_category.categorizations.maximum(:position) + 1 : 1
+          schnaeppchen.categorizations.create(category_id: schnaeppchen_category.id, position: position)
+        end
+      end
+
+      topprodukte_numbers = MercatorMesonic::Eigenschaft.where(c003: 1, c002: 12).*.c000
+
+      Product.where(number: topprodukte_numbers).each do |topprodukte|
+        unless topprodukte.categorizations.where(category_id: Category.topseller.id).any?
+          position = Category.topseller.categorizations.any? ? Category.topseller.categorizations.maximum(:position) + 1 : 1
+          topprodukte.categorizations.create(category_id: Category.topseller.id, position: position)
+        end
+      end
+
+      fireworks_numbers = MercatorMesonic::Eigenschaft.where(c003: 1, c002: 35).*.c000
+      fireworks_category = Category.find_by_name_de("Feuerwerk")
+
+      Product.where(number: fireworks_numbers).each do |firework|
+        unless firework.categorizations.where(category_id: fireworks_category.id).any?
+          position = fireworks_category.categorizations.any? ? fireworks_category.categorizations.maximum(:position) + 1 : 1
+          firework.categorizations.create(category_id: fireworks_category.id, position: position)
+        end
+      end
+    end
+
     # --- Instance Methods --- #
 
     def readonly?  # prevents unintentional changes
