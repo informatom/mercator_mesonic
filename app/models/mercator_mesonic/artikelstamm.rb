@@ -3,6 +3,8 @@ module MercatorMesonic
 
     self.table_name = "t024"
     self.primary_key = "mesoprim"
+    scope :mesoyear, -> { where(mesoyear: AktMandant.mesoyear) }
+    scope :mesocomp, -> { where(mesocomp: AktMandant.mesocomp) }
 
     # --- Class Methods --- #
     def self.invoices_by_account_number(account_number: nil)

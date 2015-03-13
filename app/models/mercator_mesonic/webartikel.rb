@@ -284,5 +284,19 @@ module MercatorMesonic
         end
       end
     end
+
+    def variations
+      # there is no default scope on Artikelstamm
+      MercatorMesonic::Artikelstamm.where(c011: self.Artikelnummer, c014: 2).mesocomp.mesoyear
+    end
+
+    def variation_hash
+      hash = Hash.new()
+      variationarray = self.variations.*.c002.*.split("-")
+      variationarray.each do |v|
+        hash[v[1]] = hash[v[1]] ? hash[v[1]] << v[2] : [v[2]]
+      end
+      return hash
+    end
   end
 end
