@@ -15,6 +15,7 @@ module InventoryExtensions
 
     customer_prices = self.mesonic_prices.by_customer(customer.erp_account_nr)
     return customer_prices.first.price if customer_prices.any?
+    # FIXME! divide by tax rate if brutto pricing
 
 #   HAS 20140407 Was not active in Opensteam!
 #    group_prices = self.mesonic_prices.by_group_through_customer(customer.erp_account_nr)
