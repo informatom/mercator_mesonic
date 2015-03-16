@@ -115,7 +115,7 @@ module MercatorMesonic
 
       self.remove_orphans(only_old: true)
       Product.deprecate
-      Category.reindexing_and_filter_updates
+      ::Category.reindexing_and_filter_updates
 
       JobLogger.info("Finished Job: webartikel:import")
       JobLogger.info("=" * 50)
@@ -227,11 +227,12 @@ module MercatorMesonic
       end
 
       topprodukte_numbers = MercatorMesonic::Eigenschaft.where(c003: 1, c002: 12).*.c000
+      topprodukte_category = ::Category.topseller
 
       Product.where(number: topprodukte_numbers).each do |topprodukte|
-        unless topprodukte.categorizations.where(category_id: Category.topseller.id).any?
-          position = ::Category.topseller.categorizations.any? ? ::Category.topseller.categorizations.maximum(:position) + 1 : 1
-          topprodukte.categorizations.create(category_id: ::Category.topseller.id, position: position)
+        unless topprodukte.categorizations.where(category_id: topprodukte_category.id).any?
+          position = topprodukte_category.categorizations.any? ? topprodukte_category.categorizations.maximum(:position) + 1 : 1
+          topprodukte.categorizations.create(category_id: topprodukte_category.id, position: position)
         end
       end
 
