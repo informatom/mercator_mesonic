@@ -27,95 +27,36 @@ module MercatorMesonic
         @webartikel = Webartikel.all
       end
 
-      amount = @webartikel.count
-      index = 0
-      if @webartikel.any?
-        @webartikel.group_by{|webartikel| webartikel.Artikelnummer }.each do |artikelnummer, artikel|
-          index = index + 1
-
-          @old_inventories = Inventory.where(number: artikelnummer)
-          @old_inventories.destroy_all if @old_inventories # This also deletes the prices!
-
-          artikel.each do |webartikel|
-            @product = Product.find_by(number: webartikel.Artikelnummer)
-
-            if @product
-              @product.recommendations.destroy_all
-
-              if @product.state == "deactivated"
-                @product.lifecycle.reactivate!(@jobuser) or
-                (( JobLogger.error("Product " + @product.id.to_s + " could not be reactivated!") ))
-              end
-            else
-              @product = Product.create_in_auto(number: webartikel.Artikelnummer,
-                                                title: webartikel.Bezeichnung,
-                                                description: webartikel.comment) or
-              (( JobLogger.error("Product " + @product.number + " could not be created!") ))
-            end
-
-            delivery_time =  webartikel.Zusatzfeld5 ? webartikel.Zusatzfeld5 : I18n.t("mercator.on_request")
-
-            @inventory = Inventory.new(product_id: @product.id,
-                                       number: webartikel.Artikelnummer,
-                                       name_de: webartikel.Bezeichnung,
-                                       comment_de: webartikel.comment,
-                                       weight: webartikel.Gewicht,
-                                       charge: webartikel.LfdChargennr,
-                                       unit: "Stk.",
-                                       delivery_time: delivery_time,
-                                       amount: 0,
-                                       erp_updated_at: webartikel.letzteAend,
-                                       erp_vatline: webartikel.Steuersatzzeile,
-                                       erp_article_group: webartikel.ArtGruppe,
-                                       erp_provision_code: webartikel.Provisionscode,
-                                       erp_characteristic_flag: webartikel.Auspraegungsflag,
-                                       infinite: true,
-                                       just_imported: true,
-                                       alternative_number: webartikel.AltArtNr1)
-
-            webartikel.create_categorization(product: @product)
-
-            @inventory.save or
-            (( JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s) ))
-
-            # ---  Price-Handling --- #
-            @price = ::Price.new(scale_from: webartikel.AbMenge,
-                                 scale_to: 9999,
-                                 vat: webartikel.Steuersatzzeile * 10,
-                                 inventory_id: @inventory.id)
-
-            if Constant.find_by_key('import_gross_prices_from_erp').try(:value) == "true"
-              @price.value = webartikel.Preis * 10 / ( 10 + webartikel.Steuersatzzeile )
-            else
-              @price.value = webartikel.Preis
-            end
-
-            if webartikel.PreisdatumVON && webartikel.PreisdatumVON <= Time.now &&
-               webartikel.PreisdatumBIS && webartikel.PreisdatumBIS >= Time.now
-              @price.attributes = { promotion: true, valid_from: webartikel.PreisdatumVON, valid_to: webartikel.PreisdatumBIS}
-            else
-              @price.attributes = { valid_from: Date.today, valid_to: Date.today + 1.year }
-            end
-
-            @price.save or
-            (( JobLogger.error("Saving Price failed: " +  @price.errors.first.to_s) ))
-
-            # ---  recommendations-Handling --- #
-            if webartikel.Notiz1.present? && webartikel.Notiz2.present?
-              @recommended_product = Product.where(number: webartikel.Notiz1).first
-              if @recommended_product
-                @product.recommendations.new(recommended_product: @recommended_product,
-                                             reason_de: webartikel.Notiz2)
-              end
-            end
-
-            @product.save or
-            (( JobLogger.error("Saving Product " + @product.id.to_s + " " + @product.number +
-                               " failed: " +  @product.errors.first.to_s)) )
-          end
-        end
-      else
+      unless @webartikel.any?
         puts "No new entries in WEBARTIKEL View, nothing updated."
+        return
+      end
+
+      @webartikel.group_by{|webartikel| webartikel.Artikelnummer }.each do |artikelnummer, artikel|
+        Inventory.where(number: artikelnummer).destroy_all # This also deletes the prices!
+
+        artikel.each do |webartikel|
+          @product = create_product
+
+          if Constant.find_by_key('erp_product_variations').try(:value) == "true"
+            variation_hash.keys.each do |store|
+              variation_hash[store].each do |size|
+                create_inventory(product: @product, store: store, size: size)
+                price = create_price(inventory: @inventory)
+              end
+            end
+          else
+            @inventory = create_inventory(product: @product)
+            price = create_price(inventory: @inventory)
+          end
+          webartikel.create_categorization(product: @product)
+
+          # ---  recommendations-Handling --- #
+          create_recommendations(@product)
+
+          @product.save or JobLogger.error("Saving Product " + @product.id.to_s + " " +
+                                           @product.number + " failed: " +  @product.errors.first.to_s)
+        end
       end
 
       self.remove_orphans(only_old: true)
@@ -124,6 +65,70 @@ module MercatorMesonic
 
       JobLogger.info("Finished Job: webartikel:import")
       JobLogger.info("=" * 50)
+    end
+
+    def create_product
+      @product = Product.find_by(number: Artikelnummer)
+
+      if @product && @product.state == "deactivated"
+        @product.lifecycle.reactivate!(@jobuser) or
+        (( JobLogger.error("Product " + @product.id.to_s + " could not be reactivated!") ))
+      end
+
+      @product ||= Product.create_in_auto(number: Artikelnummer, title: Bezeichnung,
+                                        description: comment) or
+        JobLogger.error("Product " + @product.number + " could not be created!")
+
+      return @product
+    end
+
+    def create_inventory(product: nil, store: nil, size: nil)
+      delivery_time =  Zusatzfeld5 or I18n.t("mercator.on_request")
+
+      @inventory = Inventory.create(product_id: product.id, number: Artikelnummer,
+                                   name_de: Bezeichnung, comment_de: comment, weight: Gewicht,
+                                   charge: LfdChargennr, unit: "Stk.", delivery_time: delivery_time,
+                                   amount: 0, erp_updated_at: letzteAend,
+                                   erp_vatline: Steuersatzzeile, erp_article_group: ArtGruppe,
+                                   erp_provision_code: Provisionscode,
+                                   erp_characteristic_flag: Auspraegungsflag,
+                                   infinite: true, just_imported: true,
+                                   alternative_number: AltArtNr1,
+                                   storage: store, size: size) or
+        (( JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s) ))
+
+      return @inventory
+    end
+
+    def create_price(inventory: nil)
+      @price = ::Price.new(scale_from: AbMenge, scale_to: 9999, vat: Steuersatzzeile * 10,
+                           inventory_id: inventory.id)
+
+      if Constant.find_by_key('import_gross_prices_from_erp').try(:value) == "true"
+        @price.value = Preis * 10 / ( 10 + Steuersatzzeile ) # convert to net price
+      else
+        @price.value = Preis
+      end
+
+      if PreisdatumVON && PreisdatumVON <= Time.now && PreisdatumBIS && PreisdatumBIS >= Time.now
+        @price.attributes = { promotion: true, valid_from: PreisdatumVON, valid_to: PreisdatumBIS}
+      else
+        @price.attributes = { valid_from: Date.today, valid_to: Date.new(9999,12,31) }
+      end
+
+      @price.save or (( JobLogger.error("Saving Price failed: " +  @price.errors.first.to_s) ))
+
+      return @price
+    end
+
+
+    def create_recommendations(product: nil)
+      product.recommendations.destroy_all
+      Notiz1.present? && Notiz2.present? &&
+        @recommended_product = Product.find_by(number: Notiz1) &&
+        product.recommendations.new(recommended_product: @recommended_product, reason_de: Notiz2)
+
+      return product.recommendations
     end
 
 
@@ -266,7 +271,7 @@ module MercatorMesonic
       end
     end
 
-    def create_categorization(product:nil)
+    def create_categorization(product: nil)
       categories = []
       category = Category.find_by(erp_identifier: self.Artikeluntergruppe)
       categories << category if category
