@@ -79,11 +79,16 @@ module MercatorMesonic
             (( JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s) ))
 
             # ---  Price-Handling --- #
-            @price = ::Price.new(value: webartikel.Preis,
-                                scale_from: webartikel.AbMenge,
-                                scale_to: 9999,
-                                vat: webartikel.Steuersatzzeile * 10,
-                                inventory_id: @inventory.id)
+            @price = ::Price.new(scale_from: webartikel.AbMenge,
+                                 scale_to: 9999,
+                                 vat: webartikel.Steuersatzzeile * 10,
+                                 inventory_id: @inventory.id)
+
+            if Constant.find_by_key('import_gross_prices_from_erp').try(:value) == "true"
+              @price.value = webartikel.Preis * 10 / ( 10 + webartikel.Steuersatzzeile )
+            else
+              @price.value = webartikel.Preis
+            end
 
             if webartikel.PreisdatumVON && webartikel.PreisdatumVON <= Time.now &&
                webartikel.PreisdatumBIS && webartikel.PreisdatumBIS >= Time.now
