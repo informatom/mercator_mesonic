@@ -217,7 +217,7 @@ module MercatorMesonic
 #      well, should we double check??  ....
 
       schnaeppchen_numbers = MercatorMesonic::Eigenschaft.where(c003: 1, c002: 11).*.c000
-      schnaeppchen_category = Category.find_by_name_de("Schnäppchen")
+      schnaeppchen_category = Category.find_by(name_de: "Schnäppchen")
 
       Product.where(number: schnaeppchen_numbers).each do |schnaeppchen|
         unless schnaeppchen.categorizations.where(category_id: schnaeppchen_category.id).any?
@@ -236,7 +236,7 @@ module MercatorMesonic
       end
 
       fireworks_numbers = MercatorMesonic::Eigenschaft.where(c003: 1, c002: 35).*.c000
-      fireworks_category = Category.find_by_name_de("Feuerwerk")
+      fireworks_category = Category.find_by(name_de: "Feuerwerk")
 
       Product.where(number: fireworks_numbers).each do |firework|
         unless firework.categorizations.where(category_id: fireworks_category.id).any?
