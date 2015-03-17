@@ -9,7 +9,6 @@ module MercatorMesonic
 
     # --- Class Methods --- #
     def self.import(update: "changed")
-      @jobuser = User.find_by(surname: "Job User")
       JobLogger.info("=" * 50)
 
       if update == "changed"
@@ -36,26 +35,10 @@ module MercatorMesonic
         Inventory.where(number: artikelnummer).destroy_all # This also deletes the prices!
 
         artikel.each do |webartikel|
-          @product = create_product
-
-          if Constant.find_by_key('erp_product_variations').try(:value) == "true"
-            variation_hash.keys.each do |store|
-              variation_hash[store].each do |size|
-                create_inventory(product: @product, store: store, size: size)
-                price = create_price(inventory: @inventory)
-              end
-            end
-          else
-            @inventory = create_inventory(product: @product)
-            price = create_price(inventory: @inventory)
-          end
-          webartikel.create_categorization(product: @product)
-
-          # ---  recommendations-Handling --- #
-          create_recommendations(@product)
-
-          @product.save or JobLogger.error("Saving Product " + @product.id.to_s + " " +
-                                           @product.number + " failed: " +  @product.errors.first.to_s)
+          @product = webartikel.import_and_return_product
+          @product.save or
+            JobLogger.error("Saving Product " + @product.id.to_s + " " +
+                            @product.number + " failed: " +  @product.errors.first.to_s)
         end
       end
 
@@ -66,71 +49,6 @@ module MercatorMesonic
       JobLogger.info("Finished Job: webartikel:import")
       JobLogger.info("=" * 50)
     end
-
-    def create_product
-      @product = Product.find_by(number: Artikelnummer)
-
-      if @product && @product.state == "deactivated"
-        @product.lifecycle.reactivate!(@jobuser) or
-        (( JobLogger.error("Product " + @product.id.to_s + " could not be reactivated!") ))
-      end
-
-      @product ||= Product.create_in_auto(number: Artikelnummer, title: Bezeichnung,
-                                        description: comment) or
-        JobLogger.error("Product " + @product.number + " could not be created!")
-
-      return @product
-    end
-
-    def create_inventory(product: nil, store: nil, size: nil)
-      delivery_time =  Zusatzfeld5 or I18n.t("mercator.on_request")
-
-      @inventory = Inventory.create(product_id: product.id, number: Artikelnummer,
-                                   name_de: Bezeichnung, comment_de: comment, weight: Gewicht,
-                                   charge: LfdChargennr, unit: "Stk.", delivery_time: delivery_time,
-                                   amount: 0, erp_updated_at: letzteAend,
-                                   erp_vatline: Steuersatzzeile, erp_article_group: ArtGruppe,
-                                   erp_provision_code: Provisionscode,
-                                   erp_characteristic_flag: Auspraegungsflag,
-                                   infinite: true, just_imported: true,
-                                   alternative_number: AltArtNr1,
-                                   storage: store, size: size) or
-        (( JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s) ))
-
-      return @inventory
-    end
-
-    def create_price(inventory: nil)
-      @price = ::Price.new(scale_from: AbMenge, scale_to: 9999, vat: Steuersatzzeile * 10,
-                           inventory_id: inventory.id)
-
-      if Constant.find_by_key('import_gross_prices_from_erp').try(:value) == "true"
-        @price.value = Preis * 10 / ( 10 + Steuersatzzeile ) # convert to net price
-      else
-        @price.value = Preis
-      end
-
-      if PreisdatumVON && PreisdatumVON <= Time.now && PreisdatumBIS && PreisdatumBIS >= Time.now
-        @price.attributes = { promotion: true, valid_from: PreisdatumVON, valid_to: PreisdatumBIS}
-      else
-        @price.attributes = { valid_from: Date.today, valid_to: Date.new(9999,12,31) }
-      end
-
-      @price.save or (( JobLogger.error("Saving Price failed: " +  @price.errors.first.to_s) ))
-
-      return @price
-    end
-
-
-    def create_recommendations(product: nil)
-      product.recommendations.destroy_all
-      Notiz1.present? && Notiz2.present? &&
-        @recommended_product = Product.find_by(number: Notiz1) &&
-        product.recommendations.new(recommended_product: @recommended_product, reason_de: Notiz2)
-
-      return product.recommendations
-    end
-
 
     def self.remove_orphans(only_old: false)
       JobLogger.info("=" * 50)
@@ -143,14 +61,14 @@ module MercatorMesonic
       end
       @inventories.each do |inventory|
         if Webartikel.where(Artikelnummer: inventory.number).count == 0
-          inventory.destroy or
-          (( JobLogger.error("Deleting Inventory failed: " + inventory.errors.first) ))
+          inventory.destroy \
+          or JobLogger.error("Deleting Inventory failed: " + inventory.errors.first)
         end
       end
 
       Inventory.where(just_imported: true).each do |inventory|
-        inventory.update_attributes(just_imported: false) or
-        (( JobLogger.error("Resetting new inventory" + inventory.id.to_s + "failed!") ))
+        inventory.update_attributes(just_imported: false) \
+        or JobLogger.error("Resetting new inventory" + inventory.id.to_s + "failed!")
       end
 
       JobLogger.info("Finished Job: webartikel:remove_orphans")
@@ -232,27 +150,32 @@ module MercatorMesonic
       Product.where(number: schnaeppchen_numbers).each do |schnaeppchen|
         unless schnaeppchen.categorizations.where(category_id: schnaeppchen_category.id).any?
           position = schnaeppchen_category.categorizations.any? ? schnaeppchen_category.categorizations.maximum(:position) + 1 : 1
-          schnaeppchen.categorizations.create(category_id: schnaeppchen_category.id, position: position)
+          schnaeppchen.categorizations.create(category_id: schnaeppchen_category.id,
+                                              position: position)
         end
       end
 
-      topprodukte_numbers = MercatorMesonic::Eigenschaft.where(c003: 1, c002: 12).*.c000
+      topprodukte_numbers = MercatorMesonic::Eigenschaft.where(c003: 1,
+                                                               c002: 12).*.c000
       topprodukte_category = ::Category.topseller
 
       Product.where(number: topprodukte_numbers).each do |topprodukte|
         unless topprodukte.categorizations.where(category_id: topprodukte_category.id).any?
           position = topprodukte_category.categorizations.any? ? topprodukte_category.categorizations.maximum(:position) + 1 : 1
-          topprodukte.categorizations.create(category_id: topprodukte_category.id, position: position)
+          topprodukte.categorizations.create(category_id: topprodukte_category.id,
+                                             position: position)
         end
       end
 
-      fireworks_numbers = MercatorMesonic::Eigenschaft.where(c003: 1, c002: 35).*.c000
+      fireworks_numbers = MercatorMesonic::Eigenschaft.where(c003: 1,
+                                                             c002: 35).*.c000
       fireworks_category = ::Category.find_by(name_de: "Feuerwerk")
 
       Product.where(number: fireworks_numbers).each do |firework|
         unless firework.categorizations.where(category_id: fireworks_category.id).any?
           position = fireworks_category.categorizations.any? ? fireworks_category.categorizations.maximum(:position) + 1 : 1
-          firework.categorizations.create(category_id: fireworks_category.id, position: position)
+          firework.categorizations.create(category_id: fireworks_category.id,
+                                          position: position)
         end
       end
     end
@@ -263,6 +186,108 @@ module MercatorMesonic
       true
     end
 
+    def import_and_return_product
+      @product = create_product
+
+      if Constant.find_by_key('erp_product_variations').try(:value) == "true"
+        variation_hash.keys.each do |store|
+          variation_hash[store].each do |size|
+            create_inventory(product: @product,
+                             store: store,
+                             size: size)
+            price = create_price(inventory: @inventory)
+          end
+        end
+      else
+        @inventory = create_inventory(product: @product)
+        price = create_price(inventory: @inventory)
+      end
+      create_categorization(product: @product)
+      create_recommendations(product: @product)
+
+      return @product
+    end
+
+    def create_product
+      @product = Product.find_by(number: self.Artikelnummer)
+
+      if @product && @product.lifecycle.available_transitions.*.name.include?(:reactivate)
+        @product.lifecycle.reactivate!(User::JOBUSER)
+      end
+
+      @product ||= Product.create(number:         self.Artikelnummer,
+                                  title_de:       self.Bezeichnung,
+                                  description_de: comment || self.Bezeichnung) \
+      or JobLogger.error("Product " + @product.number + " could not be created!")
+    end
+
+    def create_inventory(product: nil, store: nil, size: nil)
+      delivery_time =  self.Zusatzfeld5 or I18n.t("mercator.on_request")
+
+      @inventory = Inventory.create(product_id:              product.id,
+                                    number:                  self.Artikelnummer,
+                                    name_de:                 self.Bezeichnung,
+                                    comment_de:              comment,
+                                    weight:                  self.Gewicht,
+                                    charge:                  self.LfdChargennr,
+                                    unit:                    "Stk.",
+                                    delivery_time:           delivery_time,
+                                    amount:                  0,
+                                    erp_updated_at:          letzteAend,
+                                    erp_vatline:             self.Steuersatzzeile,
+                                    erp_article_group:       self.ArtGruppe,
+                                    erp_provision_code:      self.Provisionscode,
+                                    erp_characteristic_flag: self.Auspraegungsflag,
+                                    infinite:                true,
+                                    just_imported:           true,
+                                    alternative_number:      self.AltArtNr1,
+                                    storage:                 store,
+                                    size:                    size) \
+      or JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s)
+
+      return @inventory
+    end
+
+    def create_price(inventory: nil)
+      @price = ::Price.new(scale_from: self.AbMenge,
+                           scale_to: 9999,
+                           vat: self.Steuersatzzeile * 10,
+                           inventory_id: inventory.id)
+
+      if Constant.find_by_key('import_gross_prices_from_erp').try(:value) == "true"
+        @price.value = self.Preis * 10 / ( 10 + self.Steuersatzzeile ) # convert to net price
+      else
+        @price.value = self.Preis
+      end
+
+      if self.PreisdatumVON && self.PreisdatumVON <= Time.now && self.PreisdatumBIS &&
+        self.PreisdatumBIS >= Time.now
+        @price.attributes = { promotion: true,
+                              valid_from: self.PreisdatumVON,
+                              valid_to: self.PreisdatumBIS}
+      else
+        @price.attributes = { valid_from: Date.today,
+                              valid_to: Date.new(9999,12,31) }
+      end
+
+      @price.save or JobLogger.error("Saving Price failed: " +  @price.errors.first.to_s)
+
+      return @price
+    end
+
+
+    def create_recommendations(product: nil)
+      product.recommendations.destroy_all
+
+      self.Notiz1.present? && self.Notiz2.present? \
+      &&  @recommended_product = Product.find_by(number: self.Notiz1) \
+      &&  product.recommendations.new(recommended_product: @recommended_product,
+                                      reason_de: self.Notiz2)
+
+      return product.recommendations
+    end
+
+
     def comment
       if self.Langtext1.present?
         return self.Langtext1.to_s + " " + self.Langtext2.to_s
@@ -271,39 +296,37 @@ module MercatorMesonic
       end
     end
 
-    def create_categorization(product: nil)
-      categories = []
-      category = Category.find_by(erp_identifier: self.Artikeluntergruppe)
-      categories << category if category
 
+    def create_categorization(product: nil)
+      if category = Category.find_by(erp_identifier: self.Artikeluntergruppe)
+        Categorization.complement(product: product, category: category)
+      end
+
+      # Squeel categories
       Category.where.not(squeel_condition: [nil, '']).each do |category|
         if MercatorMesonic::Webartikel.where{instance_eval(category.squeel_condition)}.include?(self)
-          categories << category
-          JobLogger.info("Product " + product.number + " categorized by squeel into " + category.name_de.to_s )
+          Categorization.complement(product: product, category: category)
         end
       end
 
-      unless categories.any?
-        JobLogger.info("Product " + product.number + " misses category " + self.Artikeluntergruppe.to_s )
-        categories << ::Category.auto
-      end
-
-      categories.each do |category|
-        position = category.categorizations.any? ? category.categorizations.maximum(:position) + 1 : 1
-        unless product.categorizations.where(category_id: category.id).any?
-          product.categorizations.new(category_id: category.id, position: position)
-        end
+      unless product.categories.any?
+        Categorization.complement(product: product, category: ::Category.auto)
       end
     end
+
 
     def variations
       # there is no default scope on Artikelstamm
-      MercatorMesonic::Artikelstamm.where(c011: self.Artikelnummer, c014: 2).mesocomp.mesoyear
+      MercatorMesonic::Artikelstamm.where(c011: self.Artikelnummer,
+                                          c014: 2)
+                                   .mesocomp.mesoyear
     end
+
 
     def variation_hash
       hash = Hash.new()
-      variationarray = self.variations.*.c002.*.split("-")
+      # we remove the Artikelnummer for getting rid of extra "-" Characters
+      variationarray = self.variations.*.c002.*.sub(self.Artikelnummer, "").*.split("-")
       variationarray.each do |v|
         hash[v[1]] = hash[v[1]] ? hash[v[1]] << v[2] : [v[2]]
       end

@@ -6,13 +6,9 @@ namespace :mesonic do
       ::JobLogger.info("=" * 50)
       ::JobLogger.info("Started Job: mesonic:users:create_missing")
 
-      jobuser = User.find_by(surname: "Job User")
-
       MercatorMesonic::Webartikel.all.each do |webartikel|
         mesonic_artikeluntergruppe = webartikel.Artikeluntergruppe
-        if Category.find_by(erp_identifier: mesonic_artikeluntergruppe)
-          puts "Category exists"
-        else
+        unless Category.find_by(erp_identifier: mesonic_artikeluntergruppe)
           mesonic_category = MercatorMesonic::Category.find_by(c000: mesonic_artikeluntergruppe)
           category = Category.create( name_de: mesonic_category.c001,
                                       name_en: mesonic_category.c001,
@@ -22,15 +18,15 @@ namespace :mesonic do
                                       long_description_de: mesonic_category.comment,
                                       filtermin: 1,
                                       filtermax: 100,
-                                      usage: :standard)
-          puts category.errors.first if category.errors
-          category.lifecycle.activate!(jobuser) or category.errors.first
+                                      usage: :standard) \
+          or ::JobLogger.error("Cannot create category with error: " + category.errors.first)
+
+          category.lifecycle.activate!(User::JOBUSER) unless catogery.errors.any?
         end
       end
 
       # create parentrelation where possible
       Category.where.not(erp_identifier: nil).where(ancestry: nil).each do |category|
-        puts ","
         mesonic_category =  MercatorMesonic::Category.find_by(c000: category.erp_identifier)
         if  mesonic_category.parent_key && parent = Category.find_by(erp_identifier: mesonic_category.parent_key)
           category.update(parent: parent) or category.errors.first
