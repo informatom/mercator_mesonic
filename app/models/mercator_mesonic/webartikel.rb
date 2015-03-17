@@ -260,14 +260,13 @@ module MercatorMesonic
         @price.value = self.Preis
       end
 
-      if self.PreisdatumVON && self.PreisdatumVON <= Time.now && self.PreisdatumBIS &&
-        self.PreisdatumBIS >= Time.now
+      if self.PreisdatumVON && self.PreisdatumVON <= Time.now &&
+         self.PreisdatumBIS && self.PreisdatumBIS >= Time.now
         @price.attributes = { promotion: true,
                               valid_from: self.PreisdatumVON,
                               valid_to: self.PreisdatumBIS}
       else
-        @price.attributes = { valid_from: Date.today,
-                              valid_to: Date.new(9999,12,31) }
+        @price.attributes = { valid_from: Date.today, valid_to: Date.new(9999,12,31) }
       end
 
       @price.save or JobLogger.error("Saving Price failed: " +  @price.errors.first.to_s)
