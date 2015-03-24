@@ -33,6 +33,17 @@ namespace :webartikel do
     and MercatorMesonic::Webartikel.import(update: "changed")
   end
 
+  # starten als: bundle exec rake webartikel:miranda_update RAILS_ENV=production
+  desc 'Miranda-specific Update from Mesonic Webartikel view into inventories'
+  task :miranda_update => :environment do
+    MercatorMesonic::Webartikel.test_connection \
+    and MercatorMesonic::Webartikel.import(update: "changed")
+    MercatorMesonic::Webartikel.categorize_from_properties
+    MercatorMesonic::Bild.import_missing
+    MercatorMesonic::Ersatzartikel.import_relations
+  end
+
+
   # starten als: bundle exec rake webartikel:remove_orphans RAILS_ENV=production
   desc 'Remove ophaned inventories'
   task :remove_orphans => :environment do
