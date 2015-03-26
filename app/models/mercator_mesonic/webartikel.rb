@@ -172,6 +172,7 @@ module MercatorMesonic
       fireworks_category = ::Category.find_by(name_de: "Feuerwerk")
 
       Product.where(number: fireworks_numbers).each do |firework|
+        product.update(not_shippable: true)
         unless firework.categorizations.where(category_id: fireworks_category.id).any?
           position = fireworks_category.categorizations.any? ? fireworks_category.categorizations.maximum(:position) + 1 : 1
           firework.categorizations.create(category_id: fireworks_category.id,
