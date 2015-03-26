@@ -6,10 +6,15 @@ module MercatorMesonic
 
     # --- Class Methods --- #
 
-    def self.import_missing
-      Product.where(photo_file_name: nil).each do |product|
-        file_name = product.number + ".JPG"
+    def self.import(missing: true)
+      if missing == "true"
+        products = Product.where(photo_file_name: nil)
+      else
+        products = Product.all
+      end
 
+      products.each do |product|
+        file_name = product.number + ".JPG"
         bildinstance = self.find_by(C000: file_name)
         unless bildinstance
           file_name = product.number.split("-")[0] + ".JPG"
@@ -65,6 +70,7 @@ module MercatorMesonic
         if bildinstance
           data = StringIO.new(bildinstance.MESOBIN)
           product.photo = data
+          product.photo.instance_write(:file_name, file_name) # fixes filename
           product.save
         end
       end

@@ -20,7 +20,7 @@ namespace :webartikel do
     MercatorMesonic::Webartikel.test_connection
     MercatorMesonic::Webartikel.import(update: "all")
     MercatorMesonic::Webartikel.categorize_from_properties
-    MercatorMesonic::Bild.import_missing
+    MercatorMesonic::Bild.import(missing: true)
     MercatorMesonic::Ersatzartikel.import_relations
     Product.all.each {|product| product.lifecycle.activate!(User::JOBUSER)}
   end
@@ -39,7 +39,7 @@ namespace :webartikel do
     MercatorMesonic::Webartikel.test_connection \
     and MercatorMesonic::Webartikel.import(update: "changed")
     MercatorMesonic::Webartikel.categorize_from_properties
-    MercatorMesonic::Bild.import_missing
+    MercatorMesonic::Bild.import(missing: true)
     MercatorMesonic::Ersatzartikel.import_relations
   end
 
