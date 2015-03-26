@@ -190,13 +190,12 @@ module MercatorMesonic
       @product = create_product
 
       if Constant.find_by_key('erp_product_variations').try(:value) == "true"
-        variation_hash.keys.each do |store|
-          variation_hash[store].each do |size|
-            create_inventory(product: @product,
-                             store: store,
-                             size: size)
-            price = create_price(inventory: @inventory)
-          end
+        product_variations.each do |product_number|
+          create_inventory(product: @product,
+                           store: product_number.split("-")[1],
+                           size: product_number.split("-")[2],
+                           number: product_number)
+          price = create_price(inventory: @inventory)
         end
       else
         @inventory = create_inventory(product: @product)
@@ -207,6 +206,7 @@ module MercatorMesonic
 
       return @product
     end
+
 
     def create_product
       @product = Product.find_by(number: self.Artikelnummer)
@@ -221,11 +221,12 @@ module MercatorMesonic
       or JobLogger.error("Product " + @product.number + " could not be created!")
     end
 
-    def create_inventory(product: nil, store: nil, size: nil)
+
+    def create_inventory(product: nil, store: nil, size: nil, number: nil)
       delivery_time =  self.Zusatzfeld5 or I18n.t("mercator.on_request")
 
       @inventory = Inventory.create(product_id:              product.id,
-                                    number:                  self.Artikelnummer,
+                                    number:                  number || self.Artikelnummer,
                                     name_de:                 self.Bezeichnung,
                                     comment_de:              comment,
                                     weight:                  self.Gewicht,
@@ -247,6 +248,7 @@ module MercatorMesonic
 
       return @inventory
     end
+
 
     def create_price(inventory: nil)
       @price = ::Price.new(scale_from: self.AbMenge,
@@ -314,22 +316,11 @@ module MercatorMesonic
     end
 
 
-    def variations
+    def product_variations
       # there is no default scope on Artikelstamm
       MercatorMesonic::Artikelstamm.where(c011: self.Artikelnummer,
                                           c014: 2)
-                                   .mesocomp.mesoyear
-    end
-
-
-    def variation_hash
-      hash = Hash.new()
-      # we remove the Artikelnummer for getting rid of extra "-" Characters
-      variationarray = self.variations.*.c002.*.sub(self.Artikelnummer, "").*.split("-")
-      variationarray.each do |v|
-        hash[v[1]] = hash[v[1]] ? hash[v[1]] << v[2] : [v[2]]
-      end
-      return hash
+                                   .mesocomp.mesoyear.*.c002
     end
   end
 end
