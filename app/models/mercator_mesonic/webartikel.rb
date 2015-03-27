@@ -212,41 +212,46 @@ module MercatorMesonic
     def create_product
       @product = Product.find_by(number: self.Artikelnummer)
 
+      if @product && !@product.valid? # Let's fix missing descriptions here on the fly
+        @product.update(description_de: comment.present? ? comment : self.Bezeichnung)
+      end
+
       if @product && @product.lifecycle.available_transitions.*.name.include?(:reactivate)
         @product.lifecycle.reactivate!(User::JOBUSER)
       end
 
-      @product ||= Product.create(number:         self.Artikelnummer,
-                                  title_de:       self.Bezeichnung,
-                                  description_de: comment || self.Bezeichnung) \
-      or JobLogger.error("Product " + @product.number + " could not be created!")
+      @product ||= Product.new(number:         self.Artikelnummer,
+                               title_de:       self.Bezeichnung,
+                               description_de: comment.present? ? comment : self.Bezeichnung)
+      @product.save or JobLogger.error("Product " + @product.number + " could not be created:" + @product.errors.messages.to_s)
+
+      return @product
     end
 
 
     def create_inventory(product: nil, store: nil, size: nil, number: nil)
       delivery_time =  self.Zusatzfeld5 or I18n.t("mercator.on_request")
 
-      @inventory = Inventory.create(product_id:              product.id,
-                                    number:                  number || self.Artikelnummer,
-                                    name_de:                 self.Bezeichnung,
-                                    comment_de:              comment,
-                                    weight:                  self.Gewicht,
-                                    charge:                  self.LfdChargennr,
-                                    unit:                    "Stk.",
-                                    delivery_time:           delivery_time,
-                                    amount:                  0,
-                                    erp_updated_at:          letzteAend,
-                                    erp_vatline:             self.Steuersatzzeile,
-                                    erp_article_group:       self.ArtGruppe,
-                                    erp_provision_code:      self.Provisionscode,
-                                    erp_characteristic_flag: self.Auspraegungsflag,
-                                    infinite:                true,
-                                    just_imported:           true,
-                                    alternative_number:      self.AltArtNr1,
-                                    storage:                 store,
-                                    size:                    size) \
-      or JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s)
-
+      @inventory = Inventory.new(product_id:              product.id,
+                                 number:                  number.present? ? number : self.Artikelnummer,
+                                 name_de:                 self.Bezeichnung,
+                                 comment_de:              comment,
+                                 weight:                  self.Gewicht,
+                                 charge:                  self.LfdChargennr,
+                                 unit:                    "Stk.",
+                                 delivery_time:           delivery_time,
+                                 amount:                  0,
+                                 erp_updated_at:          letzteAend,
+                                 erp_vatline:             self.Steuersatzzeile,
+                                 erp_article_group:       self.ArtGruppe,
+                                 erp_provision_code:      self.Provisionscode,
+                                 erp_characteristic_flag: self.Auspraegungsflag,
+                                 infinite:                true,
+                                 just_imported:           true,
+                                 alternative_number:      self.AltArtNr1,
+                                 storage:                 store,
+                                 size:                    size)
+      @inventory.save or JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s)
       return @inventory
     end
 
@@ -273,7 +278,6 @@ module MercatorMesonic
       end
 
       @price.save or JobLogger.error("Saving Price failed: " +  @price.errors.first.to_s)
-
       return @price
     end
 
