@@ -47,6 +47,9 @@ module MercatorMesonic
 
       self.remove_orphans(only_old: true)
       Product.deprecate
+
+      Category.reactivate
+
       ::Category.reindexing_and_filter_updates
 
       JobLogger.info("Finished Job: webartikel:import")
