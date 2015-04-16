@@ -36,9 +36,12 @@ module MercatorMesonic
 
         artikel.each do |webartikel|
           @product = webartikel.import_and_return_product
-          @product.save or
+          if @product.save
+            puts @product.number.to_s + " saved."
+          else
             JobLogger.error("Saving Product " + @product.id.to_s + " " +
                             @product.number + " failed: " +  @product.errors.first.to_s)
+          end
         end
       end
 
