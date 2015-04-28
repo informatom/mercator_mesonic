@@ -24,7 +24,7 @@ namespace :webartikel do
     MercatorMesonic::Ersatzartikel.import_relations
     Product.all.each do |product|
       if product.lifecycle.available_transitions.*.name.include?(:activate)
-        product.lifecycle.activate!(User::JOBUSER)}
+        product.lifecycle.activate!(User::JOBUSER)
       end
     end
   end
