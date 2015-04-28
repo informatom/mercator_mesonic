@@ -26,6 +26,9 @@ namespace :webartikel do
       if product.lifecycle.available_transitions.*.name.include?(:activate)
         product.lifecycle.activate!(User::JOBUSER)
       end
+      if product.lifecycle.available_transitions.*.name.include?(:reactivate)
+        product.lifecycle.reactivate!(User::JOBUSER)
+      end
     end
   end
 
