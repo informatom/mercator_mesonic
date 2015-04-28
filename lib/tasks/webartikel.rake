@@ -22,7 +22,11 @@ namespace :webartikel do
     MercatorMesonic::Webartikel.categorize_from_properties
     MercatorMesonic::Bild.import(missing: true)
     MercatorMesonic::Ersatzartikel.import_relations
-    Product.all.each {|product| product.lifecycle.activate!(User::JOBUSER)}
+    Product.all.each do |product|
+      if product.lifecycle.available_transitions.*.name.include?(:activate)
+        product.lifecycle.activate!(User::JOBUSER)}
+      end
+    end
   end
 
 
