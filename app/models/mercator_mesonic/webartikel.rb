@@ -7,6 +7,7 @@ module MercatorMesonic
     has_many :mesonic_prices, :class_name => "Price",
              :foreign_key => "c000", :primary_key => "Artikelnummer"
 
+
     # --- Class Methods --- #
     def self.import(update: "changed")
       JobLogger.info("=" * 50)
@@ -56,6 +57,7 @@ module MercatorMesonic
       JobLogger.info("=" * 50)
     end
 
+
     def self.remove_orphans(only_old: false)
       JobLogger.info("=" * 50)
       JobLogger.info("Started Job: webartikel:remove_orphans")
@@ -81,6 +83,7 @@ module MercatorMesonic
       JobLogger.info("=" * 50)
     end
 
+
     # Usage from rails console: MercatorMesonic::Webartikel.test_connection
     def self.test_connection
       start_time = Time.now
@@ -101,9 +104,11 @@ module MercatorMesonic
       return false
     end
 
+
     def self.non_unique
       group(:Artikelnummer).count.select{ |key,value| value > 1 }.keys
     end
+
 
     def self.duplicates
       article_numbers = []
@@ -114,6 +119,7 @@ module MercatorMesonic
       end
       return article_numbers
     end
+
 
     def self.differences
       JobLogger.info("=" * 50)
@@ -128,9 +134,11 @@ module MercatorMesonic
       JobLogger.info("=" * 50)
     end
 
+
     def self.count_aktionen
       self.where{|w| ( w.PreisdatumVON <= Time.now) & (w.PreisdatumBIS >= Time.now)}.count
     end
+
 
     def self.update_categorizations
       Categorization.all.delete_all
@@ -143,6 +151,7 @@ module MercatorMesonic
         (( JobLogger.error("Saving Product " + @product.number + " failed: " +  @product.errors.first.to_s) ))
       end
     end
+
 
     # The Miranda way of categorizing...
     def self.categorize_from_properties
@@ -187,11 +196,13 @@ module MercatorMesonic
       end
     end
 
+
     # --- Instance Methods --- #
 
     def readonly?  # prevents unintentional changes
       true
     end
+
 
     def import_and_return_product
       @product = create_product
@@ -310,6 +321,9 @@ module MercatorMesonic
 
 
     def create_categorization(product: nil)
+      # HAS 20150522: not 100% sure, but I think I should remove the cruft:
+      product.categorizations.destroy_all
+
       if category = ::Category.find_by(erp_identifier: self.Artikeluntergruppe)
         Categorization.complement(product: product, category: category)
       end
