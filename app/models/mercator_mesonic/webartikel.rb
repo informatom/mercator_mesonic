@@ -48,7 +48,7 @@ module MercatorMesonic
       self.remove_orphans(only_old: true)
       Product.deprecate
 
-      Category.reactivate
+      ::Category.reactivate
 
       ::Category.reindexing_and_filter_updates
 
@@ -310,12 +310,12 @@ module MercatorMesonic
 
 
     def create_categorization(product: nil)
-      if category = Category.find_by(erp_identifier: self.Artikeluntergruppe)
+      if category = ::Category.find_by(erp_identifier: self.Artikeluntergruppe)
         Categorization.complement(product: product, category: category)
       end
 
       # Squeel categories
-      Category.where.not(squeel_condition: [nil, '']).each do |category|
+      ::Category.where.not(squeel_condition: [nil, '']).each do |category|
         if MercatorMesonic::Webartikel.where{instance_eval(category.squeel_condition)}.include?(self)
           Categorization.complement(product: product, category: category)
         end
