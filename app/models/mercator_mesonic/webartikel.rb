@@ -16,6 +16,9 @@ module MercatorMesonic
         JobLogger.info("Started Job: webartikel:update")
         @last_batch = [Inventory.maximum(:erp_updated_at), Time.now - 1.day].min
         @webartikel = Webartikel.where("letzteAend > ?", @last_batch)
+debugger
+        @webartikel += Webartikel.where("Erstanlage > ?", @last_batch)
+
       elsif update == "missing"
         ::JobLogger.info("Started Job: webartikel:missing")
         @webartikel = Webartikel.all
