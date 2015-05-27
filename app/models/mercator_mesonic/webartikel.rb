@@ -337,7 +337,7 @@ module MercatorMesonic
               Categorization.complement(product: product, category: category)
           end
         rescue
-            debugger
+            puts category.squeel_condition
         end
       end
 
