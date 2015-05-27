@@ -332,8 +332,12 @@ module MercatorMesonic
 
       # Squeel categories
       ::Category.where.not(squeel_condition: [nil, '']).each do |category|
-        if MercatorMesonic::Webartikel.where{instance_eval(category.squeel_condition)}.include?(self)
-          Categorization.complement(product: product, category: category)
+        begin
+          if MercatorMesonic::Webartikel.where{instance_eval(category.squeel_condition)}.include?(self)
+            Categorization.complement(product: product, category: category)
+          end
+        rescue
+          JobLogger.fatal("Invalid Squuel Condition for Category " + category.id.to_s + " " category.name_de + " : " + category.squeel_condition)
         end
       end
 
