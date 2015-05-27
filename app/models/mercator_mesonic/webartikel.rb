@@ -332,12 +332,8 @@ module MercatorMesonic
 
       # Squeel categories
       ::Category.where.not(squeel_condition: [nil, '']).each do |category|
-        begin
-          if MercatorMesonic::Webartikel.where{instance_eval(category.squeel_condition)}.include?(self)
-              Categorization.complement(product: product, category: category)
-          end
-        rescue
-            puts category.squeel_condition
+        if MercatorMesonic::Webartikel.where{instance_eval(category.squeel_condition)}.include?(self)
+          Categorization.complement(product: product, category: category)
         end
       end
 
