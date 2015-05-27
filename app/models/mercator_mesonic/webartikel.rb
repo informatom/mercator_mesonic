@@ -16,7 +16,6 @@ module MercatorMesonic
         JobLogger.info("Started Job: webartikel:update")
         @last_batch = [Inventory.maximum(:erp_updated_at), Time.now - 1.day].min
         @webartikel = Webartikel.where("letzteAend > ?", @last_batch)
-debugger
         @webartikel += Webartikel.where("Erstanlage > ?", @last_batch)
 
       elsif update == "missing"
@@ -334,7 +333,11 @@ debugger
       # Squeel categories
       ::Category.where.not(squeel_condition: [nil, '']).each do |category|
         if MercatorMesonic::Webartikel.where{instance_eval(category.squeel_condition)}.include?(self)
-          Categorization.complement(product: product, category: category)
+          begin
+            Categorization.complement(product: product, category: category)
+          rescue
+            debugger
+          end
         end
       end
 
