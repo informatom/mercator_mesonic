@@ -8,6 +8,9 @@ module MercatorMesonic
     scope :mesocomp, -> { where(mesocomp: AktMandant.mesocomp) }
     default_scope { mesocomp.mesoyear }
 
+
+    # --- Instance Methods --- #
+
     def parent_key
       groups = self.c000.split('-').reverse!
       changed = false
@@ -30,8 +33,6 @@ module MercatorMesonic
           .force_encoding("windows-1252")
           .encode("utf-8") if c003
     end
-
-    # --- Instance Methods --- #
 
     def readonly?  # prevents unintentional changes
       true
