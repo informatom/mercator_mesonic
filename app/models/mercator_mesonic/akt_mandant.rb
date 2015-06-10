@@ -4,18 +4,22 @@ module MercatorMesonic
     self.table_name = "AktMandant"
     self.primary_key = "mesocomp"
 
+    MESOCOMP = self.first.mesocomp
+    MESOYEAR = self.first.mesoyear
+
+
     # --- Class Methods --- #
 
     def self.mesocomp
-      self.first.mesocomp
+      MESOCOMP
     end
 
     def self.mesoyear
-      self.first.mesoyear
+      MESOYEAR
     end
 
     def self.mesocomp_and_year
-      [self.first.mesocomp, self.first.mesoyear]
+      [MESOCOMP, MESOYEAR]
     end
 
     # --- Instance Methods --- #
