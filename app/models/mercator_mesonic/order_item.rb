@@ -15,6 +15,7 @@ module MercatorMesonic
     attr_accessor :cart_item
     attr_accessor :mesonic_order
 
+
     # --- Class Methods --- #
 
     def self.initialize_mesonic(mesonic_order: nil, lineitem: nil, customer: nil, index: nil)

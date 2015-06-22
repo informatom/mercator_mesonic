@@ -80,7 +80,7 @@ module UserExtensions
   end
 
   def mesonic_account_number
-    "%06d" % self.erp_account_nr[0..-11] # ...it is actually a string and may contain 1I for potential buyers
+    self.erp_account_nr.split("-")[0].sub("1I","").to_i # ...it is actually a string and may contain 1I for potential buyers
   end
 
   def update_erp_account_nr
