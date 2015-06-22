@@ -5,7 +5,7 @@ module MercatorMesonic
     self.primary_key =  "mesoprim"
 
     attr_accessible :c060, :c062, :c066, :c065, :c068, :c070, :c071, :c072, :c077, :c107, :c108, :c109, :c110, :c111, :c112, :c113, :c120,
-                    :c121, :c132, :c133, :c134, :c148, :c149, :c150, :c171, :c183, :C184, :mesocomp, :mesoyear, :mesoprim
+                    :c121, :c132, :c133, :c134, :c148, :c149, :c150, :c171, :c183, :C184, :C187, :mesocomp, :mesoyear, :mesoprim
 
     scope :mesoyear, -> { where(mesoyear: AktMandant.mesoyear) }
     scope :mesocomp, -> { where(mesocomp: AktMandant.mesocomp) }
