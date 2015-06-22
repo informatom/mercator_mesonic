@@ -14,9 +14,9 @@ module MercatorMesonic
     def parent_key
       groups = self.c000.split('-').reverse!
       changed = false
-      groups.map! do |g|
-        if changed || g == "00000"
-          g
+      groups.map! do |group|
+        if changed || group == "00000"
+          group
         else
           changed = true
           "00000"
