@@ -15,10 +15,12 @@ module MercatorMesonic
     scope :mesocomp, -> { where(mesocomp: AktMandant.mesocomp) }
     default_scope { mesocomp.mesoyear }
 
+    # strange one here: gives the last interested customer ....
     scope :interessenten, -> { where("[T055].[mesoprim] LIKE ?", "1I%").select(:c002).order(c002: :desc).limit(1) }
+
     scope :interessent, -> { where("[T055].[mesoprim] LIKE ?", "1I%") }
 
-    has_one :kontenstamm_adresse, :class_name => "KontenstammAdresse", :foreign_key => "C001", :primary_key => "c002"
+    has_one :kontenstamm_adresse, :class_name => "KontenstammAdresse", :foreign_key => "c001", :primary_key => "c002"
 
     # --- Class Methods --- #
     def self.default_order
