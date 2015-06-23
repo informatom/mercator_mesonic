@@ -29,49 +29,49 @@ module MercatorMesonic
 
     def self.open_shipments_by_account_number(account_number: nil)
       find_by_sql(
-        "SELECT dbo.t025.c030 AS Konto,
-        dbo.t025.c029 AS Lieferscheindatum,
-        dbo.t025.c045 AS Lieferscheinnummer,
-        dbo.t025.c029 AS Rechnungsdatum,
-        dbo.t025.c045 AS Rechnungsnummer,
-        dbo.t025.c063 AS Bestelltext,
-        dbo.t026.c003 AS ArtNr,
-        dbo.t026.c004 AS Bezeichnung,
-        dbo.t026.c006 AS Menge,
-        dbo.t026.c007 AS Einzelpreis,
-        dbo.t026.c031 AS Gesamtpreis,
-        dbo.t024.c002,
-        dbo.t024.c003
-        FROM dbo.t024 INNER JOIN (dbo.t025 INNER JOIN dbo.t026 ON (dbo.t025.c022 = dbo.t026.c045) AND (dbo.t025.c021 = dbo.t026.c044))
-        ON (dbo.t026.c003 = dbo.t024.c002) AND (dbo.t025.mesoyear = dbo.t024.mesoyear) AND (dbo.t024.mesocomp = dbo.t025.mesocomp)
+        "SELECT t025.c030 AS Konto,
+        t025.c029 AS Lieferscheindatum,
+        t025.c045 AS Lieferscheinnummer,
+        t025.c029 AS Rechnungsdatum,
+        t025.c045 AS Rechnungsnummer,
+        t025.c063 AS Bestelltext,
+        t026.c003 AS ArtNr,
+        t026.c004 AS Bezeichnung,
+        t026.c006 AS Menge,
+        t026.c007 AS Einzelpreis,
+        t026.c031 AS Gesamtpreis,
+        t024.c002,
+        t024.c003
+        FROM t024 INNER JOIN (t025 INNER JOIN t026 ON (t025.c022 = t026.c045) AND (t025.c021 = t026.c044))
+        ON (t026.c003 = t024.c002) AND (t025.mesoyear = t024.mesoyear) AND (t024.mesocomp = t025.mesocomp)
 
-        WHERE (((dbo.t025.c030)='#{account_number}') AND ((dbo.t025.c025)='D' Or (dbo.t025.c025)='*')
-        AND ((dbo.t025.c029) Is Not Null) AND ((dbo.t025.c045) Is Not Null) AND ((dbo.t025.c137)=2) AND ((dbo.t025.mesocomp)='2004')
-        AND ((dbo.t026.mesocomp)='2004') AND ((Year(dbo.T025.c029))>(Year(GetDate())-3)) AND ((dbo.t025.c055) Is Null)
-        AND ((dbo.t024.c002)=dbo.T024.c011))
+        WHERE (((t025.c030)='#{account_number}') AND ((t025.c025)='D' Or (t025.c025)='*')
+        AND ((t025.c029) Is Not Null) AND ((t025.c045) Is Not Null) AND ((t025.c137)=2) AND ((t025.mesocomp)='2004')
+        AND ((t026.mesocomp)='2004') AND ((Year(T025.c029))>(Year(GetDate())-3)) AND ((t025.c055) Is Null)
+        AND ((t024.c002)=T024.c011))
 
-        ORDER BY dbo.t025.c029 DESC, dbo.t025.c045;"
+        ORDER BY t025.c029 DESC, t025.c045;"
       )
     end
 
     def self.open_payments_by_account_number(account_number: nil)
       find_by_sql(
-      "SELECT dbo.t025.c030 AS Konto,
-      dbo.t025.c028 AS Auftragsdatum,
-      dbo.t025.c044 AS Auftragsnummer,
-      dbo.t025.c028 AS Rechnungsdatum,
-      dbo.t025.c044 AS Rechnungsnummer,
-      dbo.t025.c063 AS Bestelltext,
-      dbo.t026.c003 AS ArtNr,
-      dbo.t026.c004 AS Bezeichnung,
-      dbo.t026.c006 AS Menge,
-      dbo.t026.c007 AS Einzelpreis,
-      dbo.t026.c031 AS Gesamtpreis
-      FROM dbo.t025 INNER JOIN dbo.t026 ON (dbo.t025.c022 = dbo.t026.c045) AND (dbo.t025.c021 = dbo.t026.c044)
-      WHERE (((dbo.t025.c030)='#{account_number}') AND ((dbo.t025.c024)='D' Or (dbo.t025.c024)='*') AND ((dbo.t025.c028) Is Not Null)
-      AND ((dbo.t025.c044) Is Not Null) AND ((dbo.t025.c137)=2) AND ((dbo.t025.mesocomp)='2004') AND ((dbo.t026.mesocomp)='2004')
-      AND ((Year(dbo.T025.c028))>(Year(GetDate())-3)) AND ((dbo.t025.c055) Is Null) AND ((dbo.t025.c045) Is Null))
-      ORDER BY dbo.t025.c028 DESC, dbo.t025.c044;"
+      "SELECT t025.c030 AS Konto,
+      t025.c028 AS Auftragsdatum,
+      t025.c044 AS Auftragsnummer,
+      t025.c028 AS Rechnungsdatum,
+      t025.c044 AS Rechnungsnummer,
+      t025.c063 AS Bestelltext,
+      t026.c003 AS ArtNr,
+      t026.c004 AS Bezeichnung,
+      t026.c006 AS Menge,
+      t026.c007 AS Einzelpreis,
+      t026.c031 AS Gesamtpreis
+      FROM t025 INNER JOIN t026 ON (t025.c022 = t026.c045) AND (t025.c021 = t026.c044)
+      WHERE (((t025.c030)='#{account_number}') AND ((t025.c024)='D' Or (t025.c024)='*') AND ((t025.c028) Is Not Null)
+      AND ((t025.c044) Is Not Null) AND ((t025.c137)=2) AND ((t025.mesocomp)='2004') AND ((t026.mesocomp)='2004')
+      AND ((Year(T025.c028))>(Year(GetDate())-3)) AND ((t025.c055) Is Null) AND ((t025.c045) Is Null))
+      ORDER BY t025.c028 DESC, t025.c044;"
       )
     end
 
