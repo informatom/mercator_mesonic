@@ -47,8 +47,17 @@ module MercatorMesonic
     end
 
     def self.initialize_mesonic(user: nil, kontonummer: nil, kontaktenummer: nil, billing_address: nil)
+      gender =
+        if user.gender == "male"
+          2
+        elsif user.gender == "female"
+          1
+        else
+          0
+        end
+
       self.new(c033: 0, c040: 1, c042: 0, c043: 0, c054: 0, c059: 0, c060: 0,
-               c035:     I18n.t("activerecord.attributes.user/genders."+ user.gender, locale: :de),
+               c035:     gender,
                c001:     user.surname,
                c002:     user.first_name,
                c003:     user.title,
@@ -58,7 +67,6 @@ module MercatorMesonic
                c012:     billing_address.phone,
                c046:     billing_address.country,
                c039:     kontonummer,
-               id:       kontaktenummer,
                c000:     kontaktenummer,
                c025:     user.email_address,
                C061:     kontaktenummer,
