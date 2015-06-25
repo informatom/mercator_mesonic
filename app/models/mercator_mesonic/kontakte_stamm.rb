@@ -27,7 +27,9 @@ module MercatorMesonic
     delegate :kunde?, :interessent?, to: :kontenstamm
     delegate :telephone, :fax, :uid_number, to: :kontenstamm_adresse
 
+
     # --- Class Methods --- #
+
     def self.default_order
       :mesoprim
     end
@@ -46,7 +48,7 @@ module MercatorMesonic
 
     def self.initialize_mesonic(user: nil, kontonummer: nil, kontaktenummer: nil, billing_address: nil)
       self.new(c033: 0, c040: 1, c042: 0, c043: 0, c054: 0, c059: 0, c060: 0,
-#               c035:     user.gender,
+               c035:     I18n.t("activerecord.attributes.user/genders."+ user.gender, locale: :de),
                c001:     user.surname,
                c002:     user.first_name,
                c003:     user.title,

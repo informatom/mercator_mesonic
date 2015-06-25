@@ -244,6 +244,10 @@ module MercatorMesonic
                                description_de: comment.present? ? comment : self.Bezeichnung)
       @product.save or JobLogger.error("Product " + @product.number + " could not be created:" + @product.errors.messages.to_s)
 
+      if Rails.application.config.try(:icecat) == true
+        @product.update_from_icecat(from_today: false)
+      end
+
       return @product
     end
 
