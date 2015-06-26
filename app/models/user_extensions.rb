@@ -57,8 +57,6 @@ module UserExtensions
       if [@mesonic_kontakte_stamm, @mesonic_kontenstamm, @mesonic_kontenstamm_adresse,
           @mesonic_kontenstamm_fibu, @mesonic_kontenstamm_fakt ].collect(&:valid?).all?
 
-      debugger
-
         [@mesonic_kontakte_stamm, @mesonic_kontenstamm, @mesonic_kontenstamm_adresse,
          @mesonic_kontenstamm_fibu, @mesonic_kontenstamm_fakt ].collect(&:save).all?
       end
@@ -96,9 +94,9 @@ module UserExtensions
     # We want to fix the local database entry for erp_account_nr if someone changed the Account on mesonic side,
     # e.g. if the potential customer ('Interessent') was changed to an actual customer accout.
     if self.erp_contact_nr && !self.mesonic_kontenstamm && self.mesonic_kontakte_stamm
-      mesonic_kontenstamm = MercatorMesonic::Kontenstamm.where(c002: self.mesonic_kontakte_stamm.c039).first
+      @mesonic_kontenstamm = MercatorMesonic::Kontenstamm.where(c002: self.mesonic_kontakte_stamm.c039).first
 
-      if self.update(erp_account_nr: mesonic_kontenstamm.mesoprim)
+      if self.update(erp_account_nr: @mesonic_kontenstamm.mesoprim)
         ::JobLogger.info("Updated user " + self.id.to_s + "'s erp account number to " + self.erp_account_nr)
       else
         ::JobLogger.error("Error updating user" + self.id.to_s + "'s erp account number")
