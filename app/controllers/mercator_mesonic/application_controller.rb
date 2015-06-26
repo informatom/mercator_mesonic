@@ -13,7 +13,7 @@ module MercatorMesonic
     private
 
     def admin_required
-      redirect_to user_login_path unless logged_in? &&  current_user.administrator?
+      redirect_to user_login_path unless logged_in? && current_user.administrator?
     end
 
     WebartikelImportJob = Struct.new(:dummy) do
