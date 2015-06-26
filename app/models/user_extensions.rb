@@ -25,6 +25,7 @@ module UserExtensions
                foreign_key: :erp_account_nr, primary_key: :mesoprim
     accepts_nested_attributes_for :mesonic_kontenstamm_adresse, allow_destroy: false
 
+
     def self.update_erp_account_nrs
       erp_users = User.where.not(erp_contact_nr: nil)
       erp_users.each {|erp_user| erp_user.update_erp_account_nr}
@@ -52,36 +53,44 @@ module UserExtensions
     @mesonic_kontenstamm_adresse =  MercatorMesonic::KontenstammAdresse.initialize_mesonic(billing_address: self.billing_addresses.last,
                                                                                            kontonummer: @kontonummer)
 
-    if [@mesonic_kontakte_stamm, @mesonic_kontenstamm, @mesonic_kontenstamm_adresse,
-        @mesonic_kontenstamm_fibu, @mesonic_kontenstamm_fakt ].collect(&:valid?).all?
+    if Rails.env == "production"
+      if [@mesonic_kontakte_stamm, @mesonic_kontenstamm, @mesonic_kontenstamm_adresse,
+          @mesonic_kontenstamm_fibu, @mesonic_kontenstamm_fakt ].collect(&:valid?).all?
 
-      [@mesonic_kontakte_stamm, @mesonic_kontenstamm, @mesonic_kontenstamm_adresse,
-       @mesonic_kontenstamm_fibu, @mesonic_kontenstamm_fakt ].collect(&:save).all?
+      debugger
 
+        [@mesonic_kontakte_stamm, @mesonic_kontenstamm, @mesonic_kontenstamm_adresse,
+         @mesonic_kontenstamm_fibu, @mesonic_kontenstamm_fakt ].collect(&:save).all?
+      end
     end
 
-    self.update(erp_account_nr: User.mesoprim(number: @kontonummer),
-                erp_contact_nr: User.mesoprim(number: @kontaktenummer) )
+    self.update(erp_account_nr: @kontonummer,
+                erp_contact_nr: @kontaktenummer )
   end
+
 
   def update_mesonic(billing_address: self.billing_addresses.first)
-    mesonic_kontenstamm_adresse = MercatorMesonic::KontenstammAdresse.where(mesoprim: self.erp_account_nr).first
+    @mesonic_kontenstamm_adresse = MercatorMesonic::KontenstammAdresse.where(mesoprim: self.erp_account_nr).first
 
-    mesonic_kontenstamm_adresse.update(c019: billing_address.phone,
-                                       c050: billing_address.street,
-                                       c051: billing_address.postalcode,
-                                       c052: billing_address.city,
-                                       c053: billing_address.detail,
-                                       c123: billing_address.country,
-                                       c179: billing_address.title,
-                                       c180: billing_address.first_name,
-                                       c181: billing_address.surname,
-                                       c116: billing_address.email_address.to_s)
+    if Rails.env == "production"
+      @mesonic_kontenstamm_adresse.update(c019: billing_address.phone,
+                                          c050: billing_address.street,
+                                          c051: billing_address.postalcode,
+                                          c052: billing_address.city,
+                                          c053: billing_address.detail,
+                                          c123: billing_address.country,
+                                          c179: billing_address.title,
+                                          c180: billing_address.first_name,
+                                          c181: billing_address.surname,
+                                          c116: billing_address.email_address.to_s)
+    end
   end
+
 
   def mesonic_account_number
     self.erp_account_nr.split("-")[0].sub("1I","").to_i # ...it is actually a string and may contain 1I for potential buyers
   end
+
 
   def update_erp_account_nr
     # We want to fix the local database entry for erp_account_nr if someone changed the Account on mesonic side,

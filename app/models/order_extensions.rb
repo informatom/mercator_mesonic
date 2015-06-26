@@ -33,7 +33,6 @@ module OrderExtensions
     end
 
     if Rails.env == "production"
-      debugger
       @save_return_value = Order.transaction do
         @mesonic_order.save
         @mesonic_order_items.collect(&:save)
