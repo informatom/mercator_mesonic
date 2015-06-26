@@ -22,7 +22,6 @@ module MercatorMesonic
     # --- Class Methods --- #
 
     def self.initialize_mesonic(order: nil, custom_order_number: nil, mesonic_kontenstamm_fakt: nil)
-
       customer = order.user
       @timestamp = Time.now
       mesonic_kontenstamm_fakt ||= customer.mesonic_kontenstamm_fakt # attribute mesonic_kontenstamm_fakt for easier testing
