@@ -9,6 +9,7 @@ module MercatorMesonic
 
 
     # --- Class Methods --- #
+
     def self.import(update: "changed")
       JobLogger.info("=" * 50)
 
