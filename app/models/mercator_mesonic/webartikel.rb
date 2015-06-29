@@ -227,7 +227,7 @@ module MercatorMesonic
         end
       else
         @inventory = create_inventory(product: @product)
-        price = create_price(inventory: @inventory)
+        @price = create_price(inventory: @inventory)
       end
       create_categorization(product: @product)
       create_recommendations(product: @product)
@@ -282,7 +282,9 @@ module MercatorMesonic
                                  alternative_number:      self.AltArtNr1,
                                  storage:                 store,
                                  size:                    size)
-      @inventory.save or JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s)
+      @inventory.save \
+      or JobLogger.error("Saving Inventory failed: " + @inventory.errors.first.to_s)
+
       return @inventory
     end
 
@@ -308,7 +310,9 @@ module MercatorMesonic
         @price.attributes = { valid_from: Date.today, valid_to: Date.new(9999,12,31) }
       end
 
-      @price.save or JobLogger.error("Saving Price failed: " +  @price.errors.first.to_s)
+      @price.save \
+      or JobLogger.error("Saving Price failed: " +  @price.errors.first.to_s)
+
       return @price
     end
 
@@ -316,10 +320,12 @@ module MercatorMesonic
     def create_recommendations(product: nil)
       product.recommendations.destroy_all
 
-      self.Notiz1.present? && self.Notiz2.present? \
-      &&  @recommended_product = Product.find_by(number: self.Notiz1) \
-      &&  product.recommendations.new(recommended_product: @recommended_product,
-                                      reason_de: self.Notiz2)
+      if self.Notiz1.present? &&
+         self.Notiz2.present? &&
+         @recommended_product = Product.find_by(number: self.Notiz1)
+        product.recommendations.new(recommended_product: @recommended_product,
+                                    reason_de: self.Notiz2)
+      end
 
       return product.recommendations
     end
