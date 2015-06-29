@@ -14,25 +14,24 @@ module MercatorMesonic
       JobLogger.info("=" * 50)
 
       if update == "changed"
-        JobLogger.info("Started Job: webartikel:update")
+        JobLogger.info("Started Job: webartikel:import:update")
         @last_batch = [Inventory.maximum(:erp_updated_at), Time.now - 1.day].min
         @webartikel = Webartikel.where("letzteAend > ?", @last_batch)
         @webartikel += Webartikel.where("Erstanlage > ?", @last_batch)
 
       elsif update == "missing"
-        ::JobLogger.info("Started Job: webartikel:missing")
+        ::JobLogger.info("Started Job: webartikel:import:missing")
         @webartikel = Webartikel.all
         productnumbers = Product.pluck("number")
         @webartikel = @webartikel.find_all{ |webartikel| !productnumbers.include?(webartikel.Artikelnummer) }
         JobLogger.info(@webartikel.count.to_s + " Products missing ...")
       else
-        ::JobLogger.info("Started Job: webartikel:import")
+        ::JobLogger.info("Started Job: webartikel:import:all")
         @webartikel = Webartikel.all
       end
 
       unless @webartikel.any?
-        puts "No new entries in WEBARTIKEL View, nothing updated."
-        return
+        JobLogger.info("No new entries in WEBARTIKEL View, nothing updated.") and return
       end
 
       @webartikel.group_by{|webartikel| webartikel.Artikelnummer }.each do |artikelnummer, artikel|
@@ -40,12 +39,12 @@ module MercatorMesonic
 
         artikel.each do |webartikel|
           @product = webartikel.import_and_return_product
-          if @product.save
-            puts @product.number.to_s + " saved."
+          if
+            @product.save
+            JobLogger.info("Saved Product " + @product.id.to_s + " " + @product.number)
           else
             JobLogger.error("Saving Product " + @product.id.to_s + " " +
                             @product.number + " failed: " +  @product.errors.first.to_s)
-          end
         end
       end
 
@@ -114,6 +113,7 @@ module MercatorMesonic
 
 
     def self.duplicates
+      # returns identical entries (all attribut values ore the same)
       article_numbers = []
       non_unique.each do |article_number|
         if where(Artikelnummer: article_number)[0].attributes.to_a - where(Artikelnummer: article_number)[1].attributes.to_a == []
