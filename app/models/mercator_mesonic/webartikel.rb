@@ -14,37 +14,41 @@ module MercatorMesonic
       JobLogger.info("=" * 50)
 
       if update == "changed"
-        JobLogger.info("Started Job: webartikel:import:update")
+        JobLogger.info("Started Job: webartikel:update")
         @last_batch = [Inventory.maximum(:erp_updated_at), Time.now - 1.day].min
         @webartikel = Webartikel.where("letzteAend > ?", @last_batch)
         @webartikel += Webartikel.where("Erstanlage > ?", @last_batch)
+        JobLogger.info(@webartikel.count.to_s + " Products to be updated ...")
 
       elsif update == "missing"
-        ::JobLogger.info("Started Job: webartikel:import:missing")
+        JobLogger.info("Started Job: webartikel:missing")
         @webartikel = Webartikel.all
         productnumbers = Product.pluck("number")
         @webartikel = @webartikel.find_all{ |webartikel| !productnumbers.include?(webartikel.Artikelnummer) }
         JobLogger.info(@webartikel.count.to_s + " Products missing ...")
       else
-        ::JobLogger.info("Started Job: webartikel:import:all")
+        JobLogger.info("Started Job: webartikel:import")
         @webartikel = Webartikel.all
+        JobLogger.info(@webartikel.count.to_s + " Products to be updated ...")
       end
 
       unless @webartikel.any?
-        JobLogger.info("No new entries in WEBARTIKEL View, nothing updated.") and return
+        JobLogger.info( "No new entries in WEBARTIKEL View, nothing updated.") and return
       end
 
       @webartikel.group_by{|webartikel| webartikel.Artikelnummer }.each do |artikelnummer, artikel|
+
         Inventory.where(number: artikelnummer).destroy_all # This also deletes the prices!
 
         artikel.each do |webartikel|
           @product = webartikel.import_and_return_product
-          if
-            @product.save
-            JobLogger.info("Saved Product " + @product.id.to_s + " " + @product.number)
+          if @product.save
+            JobLogger.info("Saving Product " + @product.id.to_s + " " +
+                            @product.number + "succeeded.")
           else
-            JobLogger.error("Saving Product " + @product.id.to_s + " " +
-                            @product.number + " failed: " +  @product.errors.first.to_s)
+            JobLogger.error("Saving Product " + @product.number +
+                            " failed: " +  @product.errors.first.to_s)
+          end
         end
       end
 
@@ -52,7 +56,6 @@ module MercatorMesonic
       Product.deprecate
 
       ::Category.reactivate
-
       ::Category.reindexing_and_filter_updates
 
       JobLogger.info("Finished Job: webartikel:import")
@@ -145,13 +148,16 @@ module MercatorMesonic
 
     def self.update_categorizations
       Categorization.all.delete_all
-      Webartikel.all.each do |webartikel|
-        product = Product.find_by(number: webartikel.Artikelnummer) or
-        (( JobLogger.error("Product not found " + webartikel.Artikelnummer) ))
 
-        webartikel.create_categorization(product: product)
-        product.save or
-        (( JobLogger.error("Saving Product " + @product.number + " failed: " +  @product.errors.first.to_s) ))
+      Webartikel.all.each do |webartikel|
+        product = Product.find_by(number: webartikel.Artikelnummer) \
+        or JobLogger.error("Product not found " + webartikel.Artikelnummer)
+
+        if product
+          webartikel.create_categorization(product: product)
+          product.save \
+          or JobLogger.error("Saving Product " + @product.number + " failed: " +  @product.errors.first.to_s)
+        end
       end
     end
 
@@ -162,38 +168,39 @@ module MercatorMesonic
 #      Product.where(number: webartikel_numbers).count
 #      well, should we double check??  ....
 
-      schnaeppchen_numbers = MercatorMesonic::Eigenschaft.where(c003: 1, c002: 11).*.c000
-      schnaeppchen_category = ::Category.find_by(name_de: "Schnäppchen")
+      @schnaeppchen_numbers = MercatorMesonic::Eigenschaft.where(c003: 1,
+                                                                c002: 11).*.c000
+      @schnaeppchen_category = ::Category.find_by(name_de: "Schnäppchen")
 
-      Product.where(number: schnaeppchen_numbers).each do |schnaeppchen|
-        unless schnaeppchen.categorizations.where(category_id: schnaeppchen_category.id).any?
-          position = schnaeppchen_category.categorizations.any? ? schnaeppchen_category.categorizations.maximum(:position) + 1 : 1
-          schnaeppchen.categorizations.create(category_id: schnaeppchen_category.id,
+      Product.where(number: @schnaeppchen_numbers).each do |schnaeppchen|
+        unless schnaeppchen.categorizations.where(category_id: @schnaeppchen_category.id).any?
+          position = @schnaeppchen_category.categorizations.any? ? @schnaeppchen_category.categorizations.maximum(:position) + 1 : 1
+          schnaeppchen.categorizations.create(category_id: @schnaeppchen_category.id,
                                               position: position)
         end
       end
 
-      topprodukte_numbers = MercatorMesonic::Eigenschaft.where(c003: 1,
-                                                               c002: 12).*.c000
-      topprodukte_category = ::Category.topseller
+      @topprodukte_numbers = MercatorMesonic::Eigenschaft.where(c003: 1,
+                                                                c002: 12).*.c000
+      @topprodukte_category = ::Category.topseller
 
-      Product.where(number: topprodukte_numbers).each do |topprodukte|
-        unless topprodukte.categorizations.where(category_id: topprodukte_category.id).any?
-          position = topprodukte_category.categorizations.any? ? topprodukte_category.categorizations.maximum(:position) + 1 : 1
-          topprodukte.categorizations.create(category_id: topprodukte_category.id,
+      Product.where(number: @topprodukte_numbers).each do |topprodukte|
+        unless topprodukte.categorizations.where(category_id: @topprodukte_category.id).any?
+          position = @topprodukte_category.categorizations.any? ? @topprodukte_category.categorizations.maximum(:position) + 1 : 1
+          topprodukte.categorizations.create(category_id: @topprodukte_category.id,
                                              position: position)
         end
       end
 
-      fireworks_numbers = MercatorMesonic::Eigenschaft.where(c003: 1,
-                                                             c002: 35).*.c000
-      fireworks_category = ::Category.find_by(name_de: "Feuerwerk")
+      @fireworks_numbers = MercatorMesonic::Eigenschaft.where(c003: 1,
+                                                              c002: 35).*.c000
+      @fireworks_category = ::Category.find_by(name_de: "Feuerwerk")
 
-      Product.where(number: fireworks_numbers).each do |firework|
-        product.update(not_shippable: true)
-        unless firework.categorizations.where(category_id: fireworks_category.id).any?
-          position = fireworks_category.categorizations.any? ? fireworks_category.categorizations.maximum(:position) + 1 : 1
-          firework.categorizations.create(category_id: fireworks_category.id,
+      Product.where(number: @fireworks_numbers).each do |firework|
+        firework.update(not_shippable: true)
+        unless firework.categorizations.where(category_id: @fireworks_category.id).any?
+          position = @fireworks_category.categorizations.any? ? @fireworks_category.categorizations.maximum(:position) + 1 : 1
+          firework.categorizations.create(category_id: @fireworks_category.id,
                                           position: position)
         end
       end
