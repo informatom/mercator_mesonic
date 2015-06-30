@@ -239,7 +239,7 @@ module MercatorMesonic
     def create_product
       @product = Product.find_by(number: self.Artikelnummer)
 
-      if @product && !@product.valid? # Let's fix missing descriptions here on the fly
+      if @product && @product.description_de.nil? # Let's fix missing descriptions here on the fly
         @product.update(description_de: comment.present? ? comment : self.Bezeichnung)
       end
 
