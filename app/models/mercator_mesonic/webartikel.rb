@@ -355,7 +355,7 @@ module MercatorMesonic
             Categorization.complement(product: product, category: category)
           end
         rescue
-          JobLogger.fatal("Invalid Squuel Condition for Category " + category.id.to_s + " " + category.name_de + " : " + category.squeel_condition)
+          JobLogger.fatal("Invalid Squeel Condition for Category " + category.id.to_s + " " + category.name_de + " : " + category.squeel_condition)
         end
       end
 
