@@ -28,7 +28,13 @@ module MercatorMesonic
       custom_order_number ||= @timestamp.strftime('%y%m%d%H%M%S') + @timestamp.usec.to_s # @timestamp, if custom order number not provided
       kontonummer = customer.mesonic_kontenstamm.try(:kunde?) ? customer.mesonic_kontenstamm.kontonummer : "09WEB"
       usernummer = customer.erp_contact_nr ? customer.erp_contact_nr : customer.id
-      billing_method = order.mesonic_payment_id == 1004 ? mesonic_kontenstamm_fakt.c107 : order.mesonic_payment_id2 #HAS 20140325 FIXME
+
+      billing_method =
+        if order.mesonic_payment_id == 1004
+          mesonic_kontenstamm_fakt.c107
+        else
+          order.mesonic_payment_id2
+        end
 
       billing_state_code = Country.where{(name_de == order.billing_country) | (name_en == order.billing_country)}.first.code
       shipping_state_code = Country.where{(name_de == order.shipping_country) | (name_en == order.shipping_country)}.first.code
