@@ -16,12 +16,14 @@ module InventoryExtensions
     @customer_prices = self.mesonic_prices.by_customer(@customer.erp_account_nr)
 
     if @customer_prices && @customer_prices.any?
-      return @customer_prices.first.price
+      if Constant.find_by_key('import_gross_prices_from_erp').try(:value) == "true"
+        return @customer_prices.first.price * 100 / ( 100 + self.prices.first.vat ) # convert to net price
+      else
+        return @customer_prices.first.price
+      end
     else
       return nil
     end
-
-    # FIXME! divide by tax rate if brutto pricing
 
 #   HAS 20140407 Was not active in Opensteam!
 #    group_prices = self.mesonic_prices.by_group_through_customer(customer.erp_account_nr)
