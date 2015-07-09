@@ -41,7 +41,7 @@ module MercatorMesonic
                c018: 0, # faktor 1 nach formeleingabe
                c019: 0, # faktor 2 nach formeleingabe
                c020: 0, # faktor 3 nach formeleingabe
-               c021: 0, # zeilenrabatt %1
+               c021: lineitem.discount_abs, # zeilenrabatt %1
                c022: 0, # zeilenrabatt %2
                c023: 0, # einstandspreis
                c024: nil, # umstatzsteuercode

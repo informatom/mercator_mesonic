@@ -105,7 +105,7 @@ module MercatorMesonic
                c037: 0, # nettotage
                c038: 0, # skonto%1
                c039: 0, # skontotage1
-               c040: 0, # summenrabatt
+               c040: order.discount, # summenrabatt
                c041: 0, # fw-zeile
                c047: mesonic_kontenstamm_fakt.c066,  # preisliste
                c049: 0, # fw einheit
