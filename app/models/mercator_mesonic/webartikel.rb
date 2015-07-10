@@ -44,7 +44,7 @@ module MercatorMesonic
           @product = webartikel.import_and_return_product
           if @product.save
             JobLogger.info("Saving Product " + @product.id.to_s + " " +
-                            @product.number + "succeeded.")
+                            @product.number + " succeeded.")
           else
             JobLogger.error("Saving Product " + @product.number +
                             " failed: " +  @product.errors.first.to_s)
@@ -73,7 +73,7 @@ module MercatorMesonic
         @inventories = Inventory.all
       end
       @inventories.each do |inventory|
-        if Webartikel.where(Artikelnummer: inventory.number).count == 0
+        if Webartikel.where(Artikelnummer: [inventory.number, inventory.product.number]).count == 0
           inventory.destroy \
           or JobLogger.error("Deleting Inventory failed: " + inventory.errors.first)
         end
