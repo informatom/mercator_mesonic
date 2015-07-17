@@ -70,7 +70,7 @@ module UserExtensions
   def update_mesonic(billing_address: self.billing_addresses.first)
     @mesonic_kontenstamm_adresse = MercatorMesonic::KontenstammAdresse.where(mesoprim: self.erp_account_nr).first
 
-    if Rails.env == "production"
+    if Rails.env == "production" && @mesonic_kontenstamm_adresse
       @mesonic_kontenstamm_adresse.update(c019: billing_address.phone,
                                           c050: billing_address.street,
                                           c051: billing_address.postalcode,
