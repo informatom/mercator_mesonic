@@ -25,7 +25,7 @@ module MercatorMesonic
 
       self.new(c000: id,
                c003: lineitem.product_number,
-               c004: lineitem.description_de,
+               c004: lineitem.title_de,
                c005: lineitem.amount, # menge bestellt
                c006: lineitem.amount, # menge geliefert
                c007: lineitem.product_price, # einzelpreis
