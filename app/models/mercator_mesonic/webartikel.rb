@@ -36,7 +36,9 @@ module MercatorMesonic
         JobLogger.info( "No new entries in WEBARTIKEL View, nothing updated.") and return
       end
 
-      @webartikel.group_by{|webartikel| webartikel.Artikelnummer }.each do |artikelnummer, artikel|
+      #HAS:20150720, Preisart 2,3 are userspecific prices, so we take only Preisart "1"
+      @webartikel.where(Preisart: "1")
+                 .group_by{|webartikel| webartikel.Artikelnummer }.each do |artikelnummer, artikel|
 
         Inventory.where(number: artikelnummer).destroy_all # This also deletes the prices!
 
