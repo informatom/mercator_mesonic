@@ -62,7 +62,7 @@ module UserExtensions
       end
     end
 
-    self.update(erp_account_nr: @kontonummer.to_s + "-" + MercatorMesonic::AktMandant::MESOCOMP.to_s + "-" + MercatorMesonic::AktMandant::MESOYEA.to_s,
+    self.update(erp_account_nr: @kontonummer.to_s + "-" + MercatorMesonic::AktMandant::MESOCOMP.to_s + "-" + MercatorMesonic::AktMandant::MESOYEAR.to_s,
                 erp_contact_nr: @kontaktenummer.to_s + "-" + MercatorMesonic::AktMandant::MESOCOMP.to_s + "-" + MercatorMesonic::AktMandant::MESOYEAR.to_s)
   end
 
