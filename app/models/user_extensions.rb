@@ -30,6 +30,10 @@ module UserExtensions
       erp_users = User.where.not(erp_contact_nr: nil)
       erp_users.each {|erp_user| erp_user.update_erp_account_nr}
     end
+
+    def self.update_business_year
+      User.all.each { |user| user.update_business_year }
+    end
   end
 
   # --- Instance Methods --- #
@@ -101,6 +105,16 @@ module UserExtensions
       else
         ::JobLogger.error("Error updating user" + self.id.to_s + "'s erp account number")
       end
+    end
+  end
+
+  def update_business_year
+    if erp_account_nr
+      self.update(erp_account_nr: erp_account_nr[0..-5] + MercatorMesonic::AktMandant::MESOYEAR.to_s)
+    end
+
+    if erp_contact_nr
+      self.update(erp_contact_nr: erp_contact_nr[0..-5] + MercatorMesonic::AktMandant::MESOYEAR.to_s)
     end
   end
 end
