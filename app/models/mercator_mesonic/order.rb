@@ -40,7 +40,7 @@ module MercatorMesonic
       shipping_state_code = Country.where{(name_de == order.shipping_country) | (name_en == order.shipping_country)}.first.code
 
       billing_salutation =
-        if order.billing_gender && order.billing_gender != "no_info"
+        if order.billing_gender && (order.billing_gender != "no_info")
           if order.billing_title
             I18n.t("activerecord.attributes.user/genders."+ order.billing_gender, locale: :de) + " " + order.billing_title
           else
@@ -51,7 +51,7 @@ module MercatorMesonic
         end
 
       shipping_salutation =
-        if order.shipping_gender && order.shipping_gender != "no_info"
+        if order.shipping_gender && (order.shipping_gender != "no_info")
           if order.shipping_title
             I18n.t("activerecord.attributes.user/genders."+ order.shipping_gender, locale: :de) + " " + order.shipping_title
           else
