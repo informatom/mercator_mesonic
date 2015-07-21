@@ -23,9 +23,16 @@ module MercatorMesonic
       product = lineitem.product
       inventory = product.determine_inventory(amount: lineitem.amount)
 
+      title =
+        if lineitem.product
+          lineitem.product.title_de
+        else
+          lineitem.description_de
+        end
+
       self.new(c000: id,
                c003: lineitem.product_number,
-               c004: lineitem.title_de,
+               c004: title,
                c005: lineitem.amount, # menge bestellt
                c006: lineitem.amount, # menge geliefert
                c007: lineitem.product_price, # einzelpreis
