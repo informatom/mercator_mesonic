@@ -50,7 +50,8 @@ module UserExtensions
                                                                                 billing_address: self.billing_addresses.last)
     @mesonic_kontenstamm  = MercatorMesonic::Kontenstamm.initialize_mesonic(user: self,
                                                                             kontonummer: @kontonummer,
-                                                                            timestamp: @timestamp)
+                                                                            timestamp: @timestamp,
+                                                                            billing_address: self.billing_addresses.last)
     @mesonic_kontenstamm_fakt = MercatorMesonic::KontenstammFakt.initialize_mesonic(kontonummer: @kontonummer,
                                                                                     email: self.email_address)
     @mesonic_kontenstamm_fibu = MercatorMesonic::KontenstammFibu.initialize_mesonic(kontonummer: @kontonummer)
@@ -90,7 +91,7 @@ module UserExtensions
 
 
   def mesonic_account_number
-    self.erp_account_nr.split("-")[0].sub("1I","").to_i # ...it is actually a string and may contain 1I for potential buyers
+    self.erp_account_nr.split("-")[0]
   end
 
 

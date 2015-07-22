@@ -39,12 +39,12 @@ module MercatorMesonic
       self.where(c002: k).any?
     end
 
-    def self.initialize_mesonic(user: nil, kontonummer: nil, timestamp: nil)
+    def self.initialize_mesonic(user: nil, kontonummer: nil, timestamp: nil, billing_address: nil)
       self.new(c146: 0, c155: 0, c156: 0, c172: 0, C253: 0, C254: 0, mesosafe: 0,
                c002:     kontonummer,
                c004:     "4",
-               c003:     user.name,
-               c084:     "",
+               c003:     billing_address.company,
+               c084:     billing_address.detail,
                c086:     timestamp,
                c102:     kontonummer,
                c103:     kontonummer,

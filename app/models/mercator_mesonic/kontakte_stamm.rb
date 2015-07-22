@@ -4,7 +4,7 @@ module MercatorMesonic
     self.table_name = "T045"
     self.primary_key = "mesoprim"
 
-    attr_accessible :c001, :c002, :c003, :c005, :c007, :c009, :c012, :c046,
+    attr_accessible :c001, :c002, :c003, :c005, :c007, :c009, :c012, :c046, :c027, :c028,
                     :c039, :id, :c000, :c025, :c033, :c035, :c040, :c042, :c043, :c054,
                     :c059, :c060, :C061, :C069, :mesocomp, :mesoyear, :mesoprim
 
@@ -47,14 +47,16 @@ module MercatorMesonic
     end
 
     def self.initialize_mesonic(user: nil, kontonummer: nil, kontaktenummer: nil, billing_address: nil)
-      gender =
-        if user.gender == "male"
-          2
-        elsif user.gender == "female"
-          1
-        else
-          0
-        end
+      if user.gender == "male"
+        gender = 2
+        salutation = "Sehr geehrter Herr " + user.surname
+      elsif user.gender == "female"
+        gender = 1
+        salutation = "Sehr geehrte Frau " + user.surname
+      else
+        gender = 0
+        salutation = "Sehr geehrte Damen und Herren"
+      end
 
       self.new(c033: 0, c040: 1, c042: 0, c043: 0, c054: 0, c059: 0, c060: 0,
                c035:     gender,
@@ -69,6 +71,8 @@ module MercatorMesonic
                c039:     kontonummer,
                c000:     kontaktenummer,
                c025:     user.email_address,
+               c027:     salutation,
+               c028:     I18n.t("activerecord.attributes.user/genders."+ user.gender, locale: :de),
                C061:     kontaktenummer,
                C069:     4,
                mesocomp: AktMandant.mesocomp,

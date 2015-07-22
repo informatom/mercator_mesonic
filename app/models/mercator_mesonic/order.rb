@@ -39,28 +39,6 @@ module MercatorMesonic
       billing_state_code = Country.where{(name_de == order.billing_country) | (name_en == order.billing_country)}.first.code
       shipping_state_code = Country.where{(name_de == order.shipping_country) | (name_en == order.shipping_country)}.first.code
 
-      billing_salutation =
-        if order.billing_gender && (order.billing_gender != "no_info")
-          if order.billing_title
-            I18n.t("activerecord.attributes.user/genders."+ order.billing_gender, locale: :de) + " " + order.billing_title
-          else
-            I18n.t("activerecord.attributes.user/genders."+ order.billing_gender, locale: :de)
-          end
-        else
-          order.billing_title
-        end
-
-      shipping_salutation =
-        if order.shipping_gender && (order.shipping_gender != "no_info")
-          if order.shipping_title
-            I18n.t("activerecord.attributes.user/genders."+ order.shipping_gender, locale: :de) + " " + order.shipping_title
-          else
-            I18n.t("activerecord.attributes.user/genders."+ order.shipping_gender, locale: :de)
-          end
-        else
-          order.shipping_title
-        end
-
       billing_c_o =
         if order.billing_detail
           order.billing_first_name + " " + order.billing_surname + " - " + order.billing_detail
@@ -76,13 +54,13 @@ module MercatorMesonic
         end
 
       self.new(c000: kontonummer + "-" + custom_order_number,
-               c003: billing_salutation,
+               c003: "",
                c004: order.billing_company,
                c005: billing_c_o,
                c006: order.billing_street,
                c007: order.billing_postalcode,
                c008: order.billing_city,
-               c009: shipping_salutation,
+               c009: "",
                c010: order.shipping_company,
                c011: shipping_c_o,
                c012: order.shipping_street,

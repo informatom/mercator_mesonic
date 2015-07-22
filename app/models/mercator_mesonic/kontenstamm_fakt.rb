@@ -32,7 +32,7 @@ module MercatorMesonic
                c107: "017",
                c112: kontonummer,
                c121: 1,
-               c183: 3, # E-Mail Fakkturen
+               c183: 4, # E-Mail Fakkturen
                C187: email,
                mesocomp: AktMandant.mesocomp,
                mesoyear: AktMandant.mesoyear,
