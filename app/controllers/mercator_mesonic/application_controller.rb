@@ -10,6 +10,12 @@ module MercatorMesonic
       redirect_to admin_logentries_path
     end
 
+    def update_business_year
+      User.update_business_year()
+      flash[:success] = "Business Year updates successfully"
+      redirect_to admin_front_path
+    end
+
     private
 
     def admin_required
