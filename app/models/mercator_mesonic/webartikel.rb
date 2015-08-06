@@ -13,22 +13,24 @@ module MercatorMesonic
     def self.import(update: "changed")
       JobLogger.info("=" * 50)
 
+      #HAS:20150720, Preisart 2,3 are userspecific prices, so we take only Preisart "1"
+
       if update == "changed"
         JobLogger.info("Started Job: webartikel:update")
         @last_batch = [Inventory.maximum(:erp_updated_at), Time.now - 1.day].min
-        @webartikel = Webartikel.where("letzteAend > ?", @last_batch)
-        @webartikel += Webartikel.where("Erstanlage > ?", @last_batch)
+        @webartikel = Webartikel.where("letzteAend > ?", @last_batch).where(Preisart: "1")
+        @webartikel += Webartikel.where("Erstanlage > ?", @last_batch).where(Preisart: "1")
         JobLogger.info(@webartikel.count.to_s + " Products to be updated ...")
 
       elsif update == "missing"
         JobLogger.info("Started Job: webartikel:missing")
-        @webartikel = Webartikel.all
+        @webartikel = Webartikel.where(Preisart: "1")
         productnumbers = Product.pluck("number")
         @webartikel = @webartikel.find_all{ |webartikel| !productnumbers.include?(webartikel.Artikelnummer) }
         JobLogger.info(@webartikel.count.to_s + " Products missing ...")
       else
         JobLogger.info("Started Job: webartikel:import")
-        @webartikel = Webartikel.all
+        @webartikel = Webartikel.where(Preisart: "1")
         JobLogger.info(@webartikel.count.to_s + " Products to be updated ...")
       end
 
@@ -36,9 +38,7 @@ module MercatorMesonic
         JobLogger.info( "No new entries in WEBARTIKEL View, nothing updated.") and return
       end
 
-      #HAS:20150720, Preisart 2,3 are userspecific prices, so we take only Preisart "1"
-      @webartikel.where(Preisart: "1")
-                 .group_by{|webartikel| webartikel.Artikelnummer }.each do |artikelnummer, artikel|
+      @webartikel.group_by{|webartikel| webartikel.Artikelnummer }.each do |artikelnummer, artikel|
 
         Inventory.where(number: artikelnummer).destroy_all # This also deletes the prices!
 
