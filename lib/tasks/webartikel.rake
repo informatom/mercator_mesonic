@@ -40,7 +40,7 @@ namespace :webartikel do
       MercatorMesonic::Webartikel.test_connection \
       and MercatorMesonic::Webartikel.import(update: "changed")
     rescue
-      UserMailer.job_failed("Mesonic Webartikel Updarte").deliver
+      UserMailer.job_failed("Mesonic Webartikel Update").deliver
     end
   end
 
