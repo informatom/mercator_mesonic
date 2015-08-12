@@ -12,8 +12,7 @@ module MercatorProductExtensions
 
     def self.check_price
       Product.active.each_with_index do |product, index|
-        puts index.to_s + ": " + product.number
-        product.check_price()
+        product.check_price(index: index)
       end
     end
   end
@@ -31,15 +30,14 @@ module MercatorProductExtensions
     end
   end
 
-  def check_price
-    mercator_price =  product.determine_price(amount: 1,
-                                              date: Time.now(),
-                                              incl_vat: false,
-                                              customer_id: User::JOBUSER.id)
-    mesonic_price = MercatorMesonic::Webarikel.find_by(Artikelnummer: number).Preis
-    if mesonic_price == mercator_price
-      puts "OK"
-    else
-      puts mesonic_price + " " + mercator_price
+  def check_price(index: 0)
+    mercator_price = determine_price(amount: 1,
+                                     date: Time.now(),
+                                     incl_vat: false,
+                                     customer_id: User::JOBUSER.id)
+    mesonic_price = MercatorMesonic::Webartikel.where(Preisart: "1").find_by(Artikelnummer: number).try(:Preis)
+    if mesonic_price && (mesonic_price - mercator_price).abs > 0.1
+      puts index.to_s + ": " + number + " " + mesonic_price.to_s + " <> " + mercator_price.to_s
+    end
   end
 end
