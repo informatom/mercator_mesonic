@@ -39,6 +39,7 @@ namespace :webartikel do
     begin
       MercatorMesonic::Webartikel.test_connection \
       and MercatorMesonic::Webartikel.import(update: "changed")
+      Product.check_price(fix: true)
     rescue
       UserMailer.job_failed("Mesonic Webartikel Update").deliver
     end
