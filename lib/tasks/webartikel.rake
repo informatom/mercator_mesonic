@@ -45,6 +45,19 @@ namespace :webartikel do
     end
   end
 
+
+  # starten als: bundle exec rake webartikel:update_prices RAILS_ENV=production
+  desc 'Update from Mesonic Webartikel view into inventories'
+  task :update_prices => :environment do
+    begin
+      MercatorMesonic::Webartikel.test_connection \
+      and Product.check_price(fix: true)
+    rescue
+      UserMailer.job_failed("Update Prices").deliver
+    end
+  end
+
+
   # starten als: bundle exec rake webartikel:miranda_update RAILS_ENV=production
   desc 'Miranda-specific Update from Mesonic Webartikel view into inventories'
   task :miranda_update => :environment do
