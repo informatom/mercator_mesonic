@@ -39,7 +39,7 @@ module MercatorProductExtensions
     webartikel = MercatorMesonic::Webartikel.where(Artikelnummer: number, Preisart: "1")
                                             .where{(preisdatumVON <= Time.now) & (preisdatumBIS >= Time.now)}
     if webartikel.count == 1
-      mesonic_price = webartikel.Preis
+      mesonic_price = webartikel[0].Preis
     else
       mesonic_price = MercatorMesonic::Webartikel.where(Preisart: "1").find_by(Artikelnummer: number).try(:Preis)
     end
