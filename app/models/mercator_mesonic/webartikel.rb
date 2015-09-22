@@ -25,7 +25,7 @@ module MercatorMesonic
       elsif update == "missing"
         JobLogger.info("Started Job: webartikel:missing")
         @webartikel = Webartikel.where(Preisart: "1")
-        productnumbers = Product.pluck("number")
+        productnumbers = Inventory.pluck("number")
         @webartikel = @webartikel.find_all{ |webartikel| !productnumbers.include?(webartikel.Artikelnummer) }
         JobLogger.info(@webartikel.count.to_s + " Products missing ...")
       else
