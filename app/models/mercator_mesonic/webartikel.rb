@@ -242,6 +242,7 @@ module MercatorMesonic
 
 
     def create_product
+      @just_created == false
       @product = Product.find_by(number: self.Artikelnummer)
 
       if @product && @product.description_de.nil? # Let's fix missing descriptions here on the fly
@@ -252,13 +253,17 @@ module MercatorMesonic
         @product.lifecycle.reactivate!(User::JOBUSER)
       end
 
-      @product ||= Product.new(number:         self.Artikelnummer,
+      unless @product
+        @product = Product.new(number:         self.Artikelnummer,
                                title_de:       self.Bezeichnung,
                                description_de: comment.present? ? comment : self.Bezeichnung)
+        @just_created == true
+      end
+
       @product.save or JobLogger.error("Product " + @product.number + " could not be created:" + @product.errors.messages.to_s)
 
-      if Rails.application.config.try(:icecat) == true
-        @product.update_from_icecat(from_today: false)
+      if @just_created == true && Rails.application.config.try(:icecat) == true
+        @product.update_from_icecat(from_today: false, initial_import: true)
       end
 
       return @product
