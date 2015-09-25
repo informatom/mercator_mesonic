@@ -65,7 +65,7 @@ module MercatorMesonic
     end
 
 
-    def self.remove_orphans(only_old: false)
+    def self.remove_orphans(only_old: false, just_test: false)
       JobLogger.info("=" * 50)
       JobLogger.info("Started Job: webartikel:remove_orphans")
 
@@ -75,9 +75,12 @@ module MercatorMesonic
         @inventories = Inventory.all
       end
       @inventories.each do |inventory|
-        if Webartikel.where(Artikelnummer: [inventory.number, inventory.product.number]).count == 0
-          inventory.destroy \
-          or JobLogger.error("Deleting Inventory failed: " + inventory.errors.first)
+        if Webartikel.where(mesokey: inventory.prices.*.erp_identifier).count == 0
+          JobLogger.info("Deleting Inventory: " + inventory.id.to_s + " , mesokey: " + inventory.prices[0].erp_identifier.to_s)
+          unless just_test == true
+            inventory.destroy \
+            or JobLogger.error("Deleting Inventory failed: " + inventory.errors.first.to_s)
+          end
         end
       end
 
