@@ -347,9 +347,6 @@ module MercatorMesonic
 
 
     def create_categorization(product: nil)
-      # HAS 20150522: not 100% sure, but I think I should remove the cruft:
-      product.categorizations.destroy_all
-
       if category = ::Category.find_by(erp_identifier: self.Artikeluntergruppe)
         Categorization.complement(product: product, category: category)
       end
