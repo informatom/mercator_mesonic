@@ -295,7 +295,8 @@ module MercatorMesonic
       @price = ::Price.new(scale_from: self.AbMenge,
                            scale_to: 9999,
                            vat: self.Steuersatzzeile * 10,
-                           inventory_id: inventory.id)
+                           inventory_id: inventory.id,
+                           erp_identifier: self.mesokey)
 
       if Constant.find_by_key('import_gross_prices_from_erp').try(:value) == "true"
         @price.value = self.Preis * 10 / ( 10 + self.Steuersatzzeile ) # convert to net price
