@@ -52,6 +52,7 @@ namespace :webartikel do
     begin
       MercatorMesonic::Webartikel.test_connection \
       and Product.check_price(fix: true)
+      Product.deprecate
     rescue
       UserMailer.job_failed("Update Prices").deliver
     end
