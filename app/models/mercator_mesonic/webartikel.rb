@@ -60,6 +60,8 @@ module MercatorMesonic
       ::Category.reactivate
       ::Category.reindexing_and_filter_updates
 
+      ::Categorization.clean_up_sqeel_categorizations(delete: true)
+
       JobLogger.info("Finished Job: webartikel:import")
       JobLogger.info("=" * 50)
     end
