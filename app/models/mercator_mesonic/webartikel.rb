@@ -35,7 +35,7 @@ module MercatorMesonic
       end
 
       unless @webartikel.any?
-        JobLogger.info( "No new entries in WEBARTIKEL View, nothing updated.") and return
+        JobLogger.info( "No new entries in WEBARTIKEL View, no products updated.")
       end
 
       @webartikel.group_by{|webartikel| webartikel.Artikelnummer }.each do |artikelnummer, artikel|
