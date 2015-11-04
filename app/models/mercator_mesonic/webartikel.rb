@@ -278,7 +278,7 @@ module MercatorMesonic
       @inventory = Inventory.new(product_id:              product.id,
                                  number:                  number.present? ? number : self.Artikelnummer,
                                  name_de:                 self.Bezeichnung,
-                                 comment_de:              comment,
+                                 comment_de:              comment[0,254],
                                  weight:                  self.Gewicht,
                                  charge:                  self.LfdChargennr,
                                  unit:                    "Stk.",
