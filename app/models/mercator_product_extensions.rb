@@ -18,6 +18,8 @@ module MercatorProductExtensions
         product.check_price(index: index, fix: fix)
       end
 
+      Category.reindexing_and_filter_updates
+
       JobLogger.info("Finished method: Product.check_price")
       JobLogger.info("=" * 50)
     end
