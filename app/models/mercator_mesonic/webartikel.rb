@@ -82,7 +82,7 @@ module MercatorMesonic
       end
       @inventories.each do |inventory|
         if Webartikel.where(mesokey: inventory.prices.*.erp_identifier).count == 0
-          JobLogger.info("Deleting Inventory: " + inventory.id.to_s + " , mesokey: " + inventory.prices[0].erp_identifier.to_s)
+          JobLogger.info("Deleting Inventory: " + inventory.id.to_s + " , mesokey: " + inventory.prices[0].try(:erp_identifier).try(:to_s)
           unless just_test == true
             inventory.destroy \
             or JobLogger.error("Deleting Inventory failed: " + inventory.errors.first.to_s)
