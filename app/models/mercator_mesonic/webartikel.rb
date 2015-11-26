@@ -10,12 +10,16 @@ module MercatorMesonic
 
     # --- Class Methods --- #
 
-    def self.import(update: "changed")
+    def self.import(update: "changed", number: nil)
       JobLogger.info("=" * 50)
 
       #HAS:20150720, Preisart 2,3 are userspecific prices, so we take only Preisart "1"
 
-      if update == "changed"
+      if number != nil
+        JobLogger.info("Started Job: webartikel:update for article " + number.to_s)
+        @webartikel = Webartikel.where(Artikelnummer: number).where(Preisart: "1")
+
+      elsif update == "changed"
         JobLogger.info("Started Job: webartikel:update")
         @last_batch = [Inventory.maximum(:erp_updated_at), Time.now - 1.day].min
         @webartikel = Webartikel.where("letzteAend > ?", @last_batch).where(Preisart: "1")
