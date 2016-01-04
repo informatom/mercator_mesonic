@@ -12,6 +12,13 @@ module MercatorMesonic
 
     def update_business_year
       User.update_business_year()
+
+      # Mesokeys for Prices change, so let's get rid of the old ones ...
+      Product.check_price(fix: true)
+
+      # ... and import the new ones
+      Webartikel.import(update: "missing")
+
       flash[:success] = "Business Year updates successfully"
       redirect_to admin_front_path
     end
