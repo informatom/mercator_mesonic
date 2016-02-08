@@ -41,7 +41,7 @@ namespace :webartikel do
       and MercatorMesonic::Webartikel.import(update: "changed")
       Product.check_price(fix: true)
     rescue
-      UserMailer.job_failed("Mesonic Webartikel Update").deliver
+      UserMailer.job_failed("Mesonic Webartikel Update").deliver_now
     end
   end
 
@@ -54,7 +54,7 @@ namespace :webartikel do
       and Product.check_price(fix: true)
       Product.deprecate
     rescue
-      UserMailer.job_failed("Update Prices").deliver
+      UserMailer.job_failed("Update Prices").deliver_now
     end
   end
 
