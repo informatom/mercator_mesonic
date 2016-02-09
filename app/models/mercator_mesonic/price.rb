@@ -24,9 +24,10 @@ module MercatorMesonic
     end
 
     # Just a guess: via t004 allowed payment types are checked, so better name would be by_payment_type_through_customer
+    # 20160209 group now reserved by active_record => rename
     # not used anyways...
     # Modified for Test: CStr([t004].[c004]) -> ([t004].[c004])
-    scope :group, ->(account_number) do
+    scope :by_payment_type_through_customer, ->(account_number) do
       joins("INNER JOIN [t004] ON [t004].[mesoyear] = #{AktMandant.mesoyear} AND [t004].[mesocomp] = #{AktMandant.mesocomp} " +
             " INNER JOIN [t054] ON [t054].[mesoyear] = #{AktMandant.mesoyear} AND " +
             "[t054].[mesocomp] = #{AktMandant.mesocomp} AND ([t004].[c001] = [t054].[c077])" +
