@@ -43,7 +43,7 @@ module OrderExtensions
       self.update(erp_customer_number: self.user.erp_account_nr,
                   erp_billing_number:  @mesonic_order.c021,
                   erp_order_number:    @mesonic_order.c022)
-      OrderMailer.confirmation(order: self).deliver
+      OrderMailer.confirmation(order: self).deliver_now
     else
       raise "Error! Order could not be pushed to mesonic!"
     end
